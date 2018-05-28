@@ -17,9 +17,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
       - Perform HALT when screen is paused (interrupt to remove HALT)
 
 
-## [0.0.3] -
+## [0.0.3] - 2017-05-28
 ### Added
-  - Basic score keeping with sprite swapping
+  - Basic score keeping by sprite swapping numbers
 
 ### Fixed
   - line() call before `wait_vbl_done()` was affecting VRAM. Deleted all `line()` calls.
