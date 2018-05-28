@@ -17,6 +17,13 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
       - Perform HALT when screen is paused (interrupt to remove HALT)
 
 
+## [0.0.3] -
+### Added
+  - Basic score keeping with sprite swapping
+
+### Fixed
+  - line() call before `wait_vbl_done()` was affecting VRAM. Deleted all `line()` calls.
+
 ## [0.0.2] - 2017-05-13
 ### Added
   - Rough Dino ducking animation while holding DOWN on the joypad

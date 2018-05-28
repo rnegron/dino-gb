@@ -15,7 +15,7 @@
 #include <gb/drawing.h>
 #include <rand.h>
 #include "dino.c"
-#include "cactus.c"
+#include "background.c"
 #include "symbols.c"
 
 /* MACROS START */
@@ -56,13 +56,55 @@
 #define DINO_FOOT_RIGHT_DOWN 1
 #define DINO_FOOT_LEFT_DOWN 2
 
+// Hazards
 #define CACTUS_TILE_COUNT 0x04
 #define CACTUS_TILE 0x16
 #define CACTUS_1 0x08
 #define CACTUS_2 0x09
 
 // UI Symbols
-#define SYMBOLS_TILE_COUNT 0x34
+#define SYMBOLS_TILE_COUNT 0x33
+
+// Number Tiles
+#define ZERO_1  0x20
+#define ZERO_2  0x22
+#define ONE_1   0x24
+#define ONE_2   0x26
+#define TWO_1   0x28
+#define TWO_2   0x2A
+#define THREE_1 0x2C
+#define THREE_2 0x2E
+#define FOUR_1  0x30
+#define FOUR_2  0x32
+#define FIVE_1  0x34
+#define FIVE_2  0x36
+#define SIX_1   0x38
+#define SIX_2   0x3A
+#define SEVEN_1 0x3C
+#define SEVEN_2 0x3E
+#define EIGHT_1 0x40
+#define EIGHT_2 0x42
+#define NINE_1  0x44
+#define NINE_2  0x46
+
+
+// Number Sprite Indexes
+#define SCORE_1_1 0x0A
+#define SCORE_1_2 0x0B
+#define SCORE_2_1 0x0C
+#define SCORE_2_2 0x0D
+#define SCORE_3_1 0x0E
+#define SCORE_3_2 0x0F
+#define SCORE_4_1 0x10
+#define SCORE_4_2 0x11
+#define SCORE_5_1 0x12
+#define SCORE_5_2 0x13
+#define SCORE_DIGITS 0x05
+
+// Score Coordinates
+#define SCORE_X 0x58
+#define SCORE_Y 0x30
+
 
 // Extra macros
 #define FOOT_SWITCH_SPEED 100 // Microseconds
@@ -71,34 +113,64 @@
 
 
 /* GLOBALS START */
-// 1 == right foot down, 2 == left foot down
-UBYTE dino_state;
-
-// Holds the return value of the joypad() function
-UBYTE key_press;
-
-// Reusable counter variable
-UBYTE i;
-/* GLOBALS START */
+UBYTE dino_state;  // 1 == right foot down, 2 == left foot down
+UBYTE key_press;  // Holds the return value of the joypad() function
+UBYTE i;  // Reusable counter variable
+UBYTE digit_left, digit_right; // Left and right sprite index of a digit
+/* GLOBALS END */
 
 /* PROTOTYPES START */
+void setup_ui();
 void start_jump();
 void play_jump_noise();
-
 void move_dino();
 void dino_jump();
 void dino_duck();
-
-void move_hazards();
-
+// void move_hazards();
+void update_score(int);
 void run_game();
 /* PROTOTYPES END */
 
 /* FUNCTIONS START */
+void setup_ui() {
+
+  // Draw starting score
+  set_sprite_tile(SCORE_1_1, ZERO_1);
+  set_sprite_tile(SCORE_1_2, ZERO_2);
+  set_sprite_tile(SCORE_2_1, ZERO_1);
+  set_sprite_tile(SCORE_2_2, ZERO_2);
+  set_sprite_tile(SCORE_3_1, ZERO_1);
+  set_sprite_tile(SCORE_3_2, ZERO_2);
+  set_sprite_tile(SCORE_4_1, ZERO_1);
+  set_sprite_tile(SCORE_4_2, ZERO_2);
+  set_sprite_tile(SCORE_5_1, ZERO_1);
+  set_sprite_tile(SCORE_5_2, ZERO_2);
+
+
+
+  move_sprite(SCORE_1_1, SCORE_X, SCORE_Y);
+  move_sprite(SCORE_1_2, SCORE_X + 8, SCORE_Y);
+  move_sprite(SCORE_2_1, SCORE_X + 16, SCORE_Y);
+  move_sprite(SCORE_2_2, SCORE_X + 24, SCORE_Y);
+  move_sprite(SCORE_3_1, SCORE_X + 32, SCORE_Y);
+  move_sprite(SCORE_3_2, SCORE_X + 40, SCORE_Y);
+  move_sprite(SCORE_4_1, SCORE_X + 48, SCORE_Y);
+  move_sprite(SCORE_4_2, SCORE_X + 56, SCORE_Y);
+  move_sprite(SCORE_5_1, SCORE_X + 64, SCORE_Y);
+  move_sprite(SCORE_5_2, SCORE_X + 72, SCORE_Y);
+
+}
+
 void start_jump() {
   // Runs after the player presses the A buton after the game boots
-  line(0, GRAPHICS_HEIGHT - 20, GRAPHICS_WIDTH - 1, GRAPHICS_HEIGHT - 20);
   dino_jump();
+
+  // Start background
+  SHOW_BKG;
+  wait_vbl_done();
+
+  // Start score display
+  setup_ui();
 
   // Set dino_state as 2 so that move_dino() changes it to 1 (right foot first)
   dino_state = DINO_FOOT_LEFT_DOWN;
@@ -213,8 +285,72 @@ void dino_duck() {
   }
 }
 
-void move_hazards() {}
+// void move_hazards() {}
 
+void update_score(int digit_pos) {
+  // This is a recursive function (!)
+
+  // Store the current digit sprite index, which is comprised of
+  // two 8x16 sprites, a left and a right half.
+  digit_left  = SCORE_1_1 + ((digit_pos - 1) << 1);
+  digit_right = SCORE_1_2 + ((digit_pos - 1) << 1);
+
+  /*
+    Example of the equation for obtaining the index of the left
+    side of the 4th digit:
+    digit_left = SCORE_1_1   [macro defined as 0x0A]
+      + ((digit_pos - 1)     [digit_pos was 4, so we have 3]
+      << 1)                  [bit shift left by 1 means multiply by 2, so we have 6]
+      ------------------------------------------------
+      = 0x0A + 0x06 = 0x10 = SCORE_4_1
+  */
+
+  switch(get_sprite_tile(digit_right)) {
+    case ZERO_2:
+      set_sprite_tile(digit_left, ONE_1);
+      set_sprite_tile(digit_right, ONE_2);
+      break;
+    case ONE_2:
+      set_sprite_tile(digit_left, TWO_1);
+      set_sprite_tile(digit_right, TWO_2);
+      break;
+    case TWO_2:
+      set_sprite_tile(digit_left, THREE_1);
+      set_sprite_tile(digit_right, THREE_2);
+      break;
+    case THREE_2:
+      set_sprite_tile(digit_left, FOUR_1);
+      set_sprite_tile(digit_right, FOUR_2);
+      break;
+    case FOUR_2:
+      set_sprite_tile(digit_left, FIVE_1);
+      set_sprite_tile(digit_right, FIVE_2);
+      break;
+    case FIVE_2:
+      set_sprite_tile(digit_left, SIX_1);
+      set_sprite_tile(digit_right, SIX_2);
+      break;
+    case SIX_2:
+      set_sprite_tile(digit_left, SEVEN_1);
+      set_sprite_tile(digit_right, SEVEN_2);
+      break;
+    case SEVEN_2:
+      set_sprite_tile(digit_left, EIGHT_1);
+      set_sprite_tile(digit_right, EIGHT_2);
+      break;
+    case EIGHT_2:
+      set_sprite_tile(digit_left, NINE_1);
+      set_sprite_tile(digit_right, NINE_2);
+      break;
+    case NINE_2:
+      set_sprite_tile(digit_left, ZERO_1);
+      set_sprite_tile(digit_right, ZERO_2);
+
+      if (digit_pos != 1) update_score(--digit_pos);
+      // else BUG: Catch overflow here?
+      break; // DEBUG Does this break statement "break" tail recursion...?
+  }
+}
 
 void run_game() {
 
@@ -224,13 +360,15 @@ void run_game() {
     // Handle Dino feet sprite swapping
     move_dino();
 
+    // Handle updating score from rightmost digit
+    update_score(SCORE_DIGITS);
+
     key_press = joypad();
     if (key_press & J_A) {
       dino_jump();
     }
 
     if (key_press & J_DOWN) {
-      wait_vbl_done();
       set_sprite_tile(0, DUCK_DINO_TAIL);
       set_sprite_tile(1, DUCK_DINO_LEFT);
       set_sprite_tile(2, DUCK_DINO_BODY);
@@ -279,15 +417,14 @@ int main() {
   // Use two 8x8 sprites stacked on top of one another
   SPRITES_8x16;
 
-  // Wait for V_BLANK interrupt (screen drawing refresh)
-  wait_vbl_done();
-
-  // DEBUG: Draw a line as temporary background
-  // The syntax is line(source x, source y, destination x, destination y)
-  line(0, GRAPHICS_HEIGHT - 20, 20, GRAPHICS_HEIGHT - 20);
-
   // Load all the Dino sprites at once
   set_sprite_data(0, DINO_TILE_COUNT, Dino);
+
+  // Load and place the UI symbols after dino sprites
+  set_sprite_data(DINO_TILE_COUNT, SYMBOLS_TILE_COUNT, Symbols);
+
+  // Load and place the hazard sprites after the UI symbols
+  // set_sprite_data(DINO_TILE_COUNT + SYMBOLS_TILE_COUNT + 1, HAZARDS_TILE_COUNT, Cactus);
 
   // The dino sprite is comprised of 2 smaller sprites that make one 8x16 sprite
   // Load both parts of the Dino sprite into the first two tile slots
@@ -298,13 +435,10 @@ int main() {
   move_sprite(0, DINO_X,  DINO_Y);
   move_sprite(1, DINO_X + DINO_SPRITE_X_SIZE, DINO_Y);
 
-  // Load and place the cactus sprite after the Dino Sprite
-  // set_sprite_data(DINO_TILE_COUNT + 1, CACTUS_TILE_COUNT, Cactus);
-  // set_sprite_tile(2, CACTUS_TILE);
+  // Wait for V_BLANK interrupt (screen drawing refresh)
+  wait_vbl_done();
 
-  // Load and place the UI symbols after the hazard sprites
-  // set_sprite_data(DINO_TILE_COUNT + CACTUS_TILE_COUNT + 1, SYMBOLS_TILE_COUNT, Symbols);
-
+  // Writes 0x02U to LCDC_REG (0xFF40)
   SHOW_SPRITES;
 
   // Static screen, wait for user input (an A button press)
@@ -318,13 +452,3 @@ int main() {
 
 }
 /* FUNCTIONS END */
-
-/* Code dump
-
-scoreParts[0] = score / 10000;
-scoreParts[1] = score / 1000 - scoreParts[0] * 100;
-scoreParts[2] = score / 100 - (scoreParts[0] * 1000 + scoreParts[1] * 100);
-scoreParts[3] = score - (scoreParts[0] * 10000 + scoreParts[1] * 1000 + scoreParts[2] * 100);
-scoreParts[4] = score - (scoreParts[0] * 100000 + scoreParts[1] * 10000 + scoreParts[2] * 1000 + scoreParts[3] * 100)
-
-*/
