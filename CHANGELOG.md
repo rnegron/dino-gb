@@ -6,9 +6,11 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 ## [To-Do]
   - Pterodactyl sprites
   - Collisions
+    - Collisions with Pterodactyl
   - Difficulty increase
   - All the sound effects
   - Score Window
+    - - Hi Score tracking
   - Parallax Scrolling
   - Night shift after certain score
   - Extras
@@ -16,6 +18,13 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
       - Toggle sounds (write 0x00 to NR52_REG for sound OFF, 0x80 for sound ON)
       - Perform HALT when screen is paused (interrupt to remove HALT)
 
+## [0.0.4] - 2017-06-01
+### Added
+  - Loading and scrolling Hazards (Cactus)
+  - Basic rectangle collision checks
+
+### Changed
+  - Changed `int` declarations to `UBYTE` declarations
 
 ## [0.0.3] - 2017-05-28
 ### Added

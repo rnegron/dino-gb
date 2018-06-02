@@ -13,15 +13,14 @@
 #include <gb/gb.h>
 #include <gb/font.h>
 #include <gb/drawing.h>
+#include <gb/hardware.h>
 #include <rand.h>
 #include "dino.c"
 #include "background.c"
 #include "symbols.c"
+#include "hazards.c"
 
 /* MACROS START */
-#define DINO_X 0x14
-#define DINO_Y GRAPHICS_HEIGHT - 17 // Y position is relative to the bottom of the screen
-
 #define DINO_TILE_COUNT 0x1C
 #define DINO_SPRITE_X_SIZE 0x08
 #define IDLE_DINO_1_TILE 0x00
@@ -39,12 +38,12 @@
 // Dino Sprite Indexes
 #define IDLE_DINO_1 0x00
 #define IDLE_DINO_2 0x01
-#define HURT_DINO_1 0x02
-#define HURT_DINO_2 0x03
-#define RIGHT_STEP_DINO_1 0x04
-#define RIGHT_STEP_DINO_2 0x05
-#define LEFT_STEP_DINO_1 0x06
-#define LEFT_STEP_DINO_2 0x07
+#define HURT_DINO_1 0x04
+#define HURT_DINO_2 0x06
+#define RIGHT_STEP_DINO_1 0x08
+#define RIGHT_STEP_DINO_2 0x0A
+#define LEFT_STEP_DINO_1 0x0C
+#define LEFT_STEP_DINO_2 0x0E
 #define DUCK_DINO_BODY 0x10
 #define DUCK_DINO_HEAD 0x12
 #define DUCK_DINO_TAIL 0x14
@@ -55,12 +54,6 @@
 #define DINO_IS_IDLE 0
 #define DINO_FOOT_RIGHT_DOWN 1
 #define DINO_FOOT_LEFT_DOWN 2
-
-// Hazards
-#define CACTUS_TILE_COUNT 0x04
-#define CACTUS_TILE 0x16
-#define CACTUS_1 0x08
-#define CACTUS_2 0x09
 
 // UI Symbols
 #define SYMBOLS_TILE_COUNT 0x33
@@ -87,6 +80,14 @@
 #define NINE_1  0x44
 #define NINE_2  0x46
 
+// Hazards
+#define HAZARDS_TILE_COUNT 0x04
+#define CACTUS_TILE 0x4F
+
+// Hazard Sprite Indexes
+#define CACTUS_1 0x50
+#define CACTUS_2 0x52
+
 
 // Number Sprite Indexes
 #define SCORE_1_1 0x0A
@@ -105,7 +106,6 @@
 #define SCORE_X 0x58
 #define SCORE_Y 0x30
 
-
 // Extra macros
 #define FOOT_SWITCH_SPEED 100 // Microseconds
 
@@ -113,21 +113,26 @@
 
 
 /* GLOBALS START */
+UBYTE DINO_X, DINO_Y;
 UBYTE dino_state;  // 1 == right foot down, 2 == left foot down
 UBYTE key_press;  // Holds the return value of the joypad() function
 UBYTE i;  // Reusable counter variable
 UBYTE digit_left, digit_right; // Left and right sprite index of a digit
+UBYTE CACTUS_X, CACTUS_Y;
 /* GLOBALS END */
 
 /* PROTOTYPES START */
 void setup_ui();
 void start_jump();
 void play_jump_noise();
+void play_death_noise();
 void move_dino();
 void dino_jump();
 void dino_duck();
-// void move_hazards();
-void update_score(int);
+void move_hazards();
+void update_score(UBYTE);
+UBYTE check_collisions(UBYTE, UBYTE, UBYTE, UBYTE, UBYTE, UBYTE, UBYTE, UBYTE);
+void restart();
 void run_game();
 /* PROTOTYPES END */
 
@@ -197,10 +202,52 @@ void play_jump_noise() {
   NR44_REG = 0xC0;
 }
 
+void play_death_noise() {
+  NR10_REG = 0x70;
+  NR11_REG = 0x8A;
+  NR12_REG = 0x44;
+  NR13_REG = 0xF4;
+  NR14_REG = 0x81;
+  NR21_REG = 0x81;
+  NR22_REG = 0x84;
+  NR23_REG = 0xD7;
+  NR24_REG = 0x86;
+  NR30_REG = 0x80;
+  NR31_REG = 0x00;
+  NR32_REG = 0x20;
+  NR33_REG = 0xD6;
+  NR34_REG = 0x86;
+  NR41_REG = 0x3A;
+  NR42_REG = 0xA1;
+  NR43_REG = 0x00;
+  NR44_REG = 0xC0;
+
+  delay(100);
+
+  NR10_REG = 0x70;
+  NR11_REG = 0x8A;
+  NR12_REG = 0x44;
+  NR13_REG = 0xC8;
+  NR14_REG = 0x80;
+  NR21_REG = 0x81;
+  NR22_REG = 0x84;
+  NR23_REG = 0xD7;
+  NR24_REG = 0x86;
+  NR30_REG = 0x80;
+  NR31_REG = 0x00;
+  NR32_REG = 0x20;
+  NR33_REG = 0xD6;
+  NR34_REG = 0x86;
+  NR41_REG = 0x3A;
+  NR42_REG = 0xA1;
+  NR43_REG = 0x00;
+  NR44_REG = 0xC0;
+}
+
 void move_dino() {
+
   // Switches the sprites on the Dino to make
   // a running animation, alternating feet
-
   switch(dino_state) {
 
     case DINO_FOOT_LEFT_DOWN:
@@ -285,9 +332,14 @@ void dino_duck() {
   }
 }
 
-// void move_hazards() {}
+void move_hazards() {
+  if (CACTUS_X == 8) CACTUS_X = GRAPHICS_WIDTH;
+  move_sprite(20, CACTUS_X, DINO_Y);
+  move_sprite(21, CACTUS_X + 8, DINO_Y);
+  CACTUS_X -= 5;
+}
 
-void update_score(int digit_pos) {
+void update_score(UBYTE digit_pos) {
   // This is a recursive function (!)
 
   // Store the current digit sprite index, which is comprised of
@@ -352,13 +404,37 @@ void update_score(int digit_pos) {
   }
 }
 
+UBYTE check_collisions(UBYTE x_1, UBYTE y_1, UBYTE w_1, UBYTE h_1, UBYTE x_2, UBYTE y_2, UBYTE w_2, UBYTE h_2) {
+  if ((x_1 < (x_2 + w_2)) && ((x_1 + w_1) > x_2) && (y_1 < (h_2 + y_2)) && ((y_1 + h_1) > y_2)) return 1;
+  else return 0;
+}
+
+void restart() {
+  // Save current high score
+  // Reset difficulty, etc.
+}
+
 void run_game() {
+
+  // DEBUG
+  CACTUS_X = GRAPHICS_WIDTH - 24;
+  CACTUS_Y = DINO_Y;
+  set_sprite_tile(20, CACTUS_1);
+  set_sprite_tile(21, CACTUS_2);
+  move_sprite(20, CACTUS_X, DINO_Y);
+  move_sprite(21, CACTUS_X + 8, DINO_Y);
 
   while(1) {
     wait_vbl_done();
 
     // Handle Dino feet sprite swapping
     move_dino();
+    if (check_collisions(DINO_X, DINO_Y, 8, 8, CACTUS_X, CACTUS_Y, 8, 8) == 1) {
+      set_sprite_tile(0, HURT_DINO_1);
+      set_sprite_tile(1, HURT_DINO_2);
+      play_death_noise();
+      waitpad(J_A);
+    }
 
     // Handle updating score from rightmost digit
     update_score(SCORE_DIGITS);
@@ -393,10 +469,7 @@ void run_game() {
     }
 
     // Scroll objects to the left
-    // move_hazards();
-
-    // Check collisions
-    // check_collisions();
+    move_hazards();
 
     //Scroll the background
     // move_world();
@@ -417,6 +490,9 @@ int main() {
   // Use two 8x8 sprites stacked on top of one another
   SPRITES_8x16;
 
+  DINO_X = 0x14;
+  DINO_Y = GRAPHICS_HEIGHT - 17; // Y position is relative to the bottom of the screen
+
   // Load all the Dino sprites at once
   set_sprite_data(0, DINO_TILE_COUNT, Dino);
 
@@ -424,7 +500,7 @@ int main() {
   set_sprite_data(DINO_TILE_COUNT, SYMBOLS_TILE_COUNT, Symbols);
 
   // Load and place the hazard sprites after the UI symbols
-  // set_sprite_data(DINO_TILE_COUNT + SYMBOLS_TILE_COUNT + 1, HAZARDS_TILE_COUNT, Cactus);
+  set_sprite_data(DINO_TILE_COUNT + SYMBOLS_TILE_COUNT + 1, HAZARDS_TILE_COUNT, Hazards);
 
   // The dino sprite is comprised of 2 smaller sprites that make one 8x16 sprite
   // Load both parts of the Dino sprite into the first two tile slots
