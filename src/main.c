@@ -11,85 +11,72 @@
 */
 
 #include <gb/gb.h>
-#include <gb/font.h>
 #include <gb/drawing.h>
-#include <gb/hardware.h>
-#include <rand.h>
+
 #include "dino.c"
-#include "background.c"
-#include "symbols.c"
+#include "letters.c"
+#include "digits.c"
 #include "hazards.c"
+#include "gameover.c"
 
 /* MACROS START */
-#define DINO_TILE_COUNT 0x1C
-#define DINO_SPRITE_X_SIZE 0x08
-#define IDLE_DINO_1_TILE 0x00
-#define IDLE_DINO_2_TILE 0x02
-#define HURT_DINO_1_TILE 0x04
-#define HURT_DINO_2_TILE 0x06
+// Dino VRAM tile indices
+#define IDLE_DINO_1_TILE       0x00
+#define IDLE_DINO_2_TILE       0x02
+#define HURT_DINO_1_TILE       0x04
+#define HURT_DINO_2_TILE       0x06
 #define RIGHT_FOOT_DINO_1_TILE 0x08
 #define RIGHT_FOOT_DINO_2_TILE 0x0A
-#define LEFT_FOOT_DINO_1_TILE 0x0C
-#define LEFT_FOOT_DINO_2_TILE 0X0E
-#define DUCK_DINO_1_TILE 0x10
-#define DUCK_DINO_2_TILE 0x12
-#define DUCK_DINO_3_TILE 0x14
+#define LEFT_FOOT_DINO_1_TILE  0x0C
+#define LEFT_FOOT_DINO_2_TILE  0X0E
+#define DUCK_DINO_1_TILE       0x10
+#define DUCK_DINO_2_TILE       0x12
+#define DUCK_DINO_3_TILE       0x14
 
-// Dino Sprite Indexes
-#define IDLE_DINO_1 0x00
-#define IDLE_DINO_2 0x01
-#define HURT_DINO_1 0x04
-#define HURT_DINO_2 0x06
+// Dino Tile Indices
+#define IDLE_DINO_1       0x00
+#define IDLE_DINO_2       0x01
+#define HURT_DINO_1       0x04
+#define HURT_DINO_2       0x06
 #define RIGHT_STEP_DINO_1 0x08
 #define RIGHT_STEP_DINO_2 0x0A
-#define LEFT_STEP_DINO_1 0x0C
-#define LEFT_STEP_DINO_2 0x0E
-#define DUCK_DINO_BODY 0x10
-#define DUCK_DINO_HEAD 0x12
-#define DUCK_DINO_TAIL 0x14
-#define DUCK_DINO_LEFT 0x16
-#define DUCK_DINO_RIGHT 0x1A
+#define LEFT_STEP_DINO_1  0x0C
+#define LEFT_STEP_DINO_2  0x0E
+#define DUCK_DINO_BODY    0x10
+#define DUCK_DINO_HEAD    0x12
+#define DUCK_DINO_TAIL    0x14
+#define DUCK_DINO_LEFT    0x16
+#define DUCK_DINO_RIGHT   0x1A
 
-// States
-#define DINO_IS_IDLE 0
-#define DINO_FOOT_RIGHT_DOWN 1
-#define DINO_FOOT_LEFT_DOWN 2
+// Dino Sprite Indices
+#define DINO_1 0x00
+#define DINO_2 0x01
+#define DINO_3 0x03
+#define DINO_4 0x04
 
-// UI Symbols
-#define SYMBOLS_TILE_COUNT 0x33
+// Digit Tiles
+#define ZERO_1  0x1C
+#define ZERO_2  0x1E
+#define ONE_1   0x20
+#define ONE_2   0x22
+#define TWO_1   0x24
+#define TWO_2   0x26
+#define THREE_1 0x28
+#define THREE_2 0x2A
+#define FOUR_1  0x2C
+#define FOUR_2  0x2E
+#define FIVE_1  0x30
+#define FIVE_2  0x32
+#define SIX_1   0x34
+#define SIX_2   0x36
+#define SEVEN_1 0x38
+#define SEVEN_2 0x3A
+#define EIGHT_1 0x3C
+#define EIGHT_2 0x3E
+#define NINE_1  0x40
+#define NINE_2  0x42
 
-// Number Tiles
-#define ZERO_1  0x20
-#define ZERO_2  0x22
-#define ONE_1   0x24
-#define ONE_2   0x26
-#define TWO_1   0x28
-#define TWO_2   0x2A
-#define THREE_1 0x2C
-#define THREE_2 0x2E
-#define FOUR_1  0x30
-#define FOUR_2  0x32
-#define FIVE_1  0x34
-#define FIVE_2  0x36
-#define SIX_1   0x38
-#define SIX_2   0x3A
-#define SEVEN_1 0x3C
-#define SEVEN_2 0x3E
-#define EIGHT_1 0x40
-#define EIGHT_2 0x42
-#define NINE_1  0x44
-#define NINE_2  0x46
-
-// Hazards
-#define HAZARDS_TILE_COUNT 0x04
-#define CACTUS_TILE 0x4F
-
-// Hazard Sprite Indexes
-#define CACTUS_1 0x50
-#define CACTUS_2 0x52
-
-
-// Number Sprite Indexes
+// Digit Sprite Indices
 #define SCORE_1_1 0x0A
 #define SCORE_1_2 0x0B
 #define SCORE_2_1 0x0C
@@ -100,14 +87,35 @@
 #define SCORE_4_2 0x11
 #define SCORE_5_1 0x12
 #define SCORE_5_2 0x13
-#define SCORE_DIGITS 0x05
 
-// Score Coordinates
-#define SCORE_X 0x58
-#define SCORE_Y 0x30
+// Hazards
+#define CACTUS_TILE 0x4F
+
+// Hazard Sprite Tiles
+#define CACTUS_1_TILE 0x44
+#define CACTUS_2_TILE 0x46
+
+// Hazard Sprite Indices
+#define CACTUS_1 0x1E
+#define CACTUS_2 0x1F
 
 // Extra macros
-#define FOOT_SWITCH_SPEED 100 // Microseconds
+#define DINO_TILE_COUNT      0x1C
+#define DINO_SPRITE_X_SIZE   0x08
+#define FOOT_SWITCH_SPEED    0x64  // 100 in base 10 (Microseconds)
+#define DINO_IS_IDLE         0x00
+#define DINO_FOOT_RIGHT_DOWN 0x01
+#define DINO_FOOT_LEFT_DOWN  0x02
+
+#define LETTERS_TILE_COUNT   0x2C
+#define DIGITS_TILE_COUNT    0x28
+#define SCORE_DIGITS         0x05 // i.e. 00000
+#define SCORE_X              0x54
+#define SCORE_Y              0x16
+#define GAME_OVER_X          0x28
+#define GAME_OVER_Y          0x28
+
+#define HAZARDS_TILE_COUNT   0x04
 
 /* MACROS END */
 
@@ -122,7 +130,7 @@ UBYTE CACTUS_X, CACTUS_Y;
 /* GLOBALS END */
 
 /* PROTOTYPES START */
-void setup_ui();
+void setup_score();
 void start_jump();
 void play_jump_noise();
 void play_death_noise();
@@ -131,13 +139,14 @@ void dino_jump();
 void dino_duck();
 void move_hazards();
 void update_score(UBYTE);
-UBYTE check_collisions(UBYTE, UBYTE, UBYTE, UBYTE, UBYTE, UBYTE, UBYTE, UBYTE);
+BOOLEAN check_collisions(UBYTE, UBYTE, UBYTE, UBYTE, UBYTE, UBYTE, UBYTE, UBYTE);
+void game_over();
 void restart();
 void run_game();
 /* PROTOTYPES END */
 
 /* FUNCTIONS START */
-void setup_ui() {
+void setup_score() {
 
   // Draw starting score
   set_sprite_tile(SCORE_1_1, ZERO_1);
@@ -152,7 +161,6 @@ void setup_ui() {
   set_sprite_tile(SCORE_5_2, ZERO_2);
 
 
-
   move_sprite(SCORE_1_1, SCORE_X, SCORE_Y);
   move_sprite(SCORE_1_2, SCORE_X + 8, SCORE_Y);
   move_sprite(SCORE_2_1, SCORE_X + 16, SCORE_Y);
@@ -163,7 +171,6 @@ void setup_ui() {
   move_sprite(SCORE_4_2, SCORE_X + 56, SCORE_Y);
   move_sprite(SCORE_5_1, SCORE_X + 64, SCORE_Y);
   move_sprite(SCORE_5_2, SCORE_X + 72, SCORE_Y);
-
 }
 
 void start_jump() {
@@ -171,11 +178,10 @@ void start_jump() {
   dino_jump();
 
   // Start background
-  SHOW_BKG;
   wait_vbl_done();
 
   // Start score display
-  setup_ui();
+  setup_score();
 
   // Set dino_state as 2 so that move_dino() changes it to 1 (right foot first)
   dino_state = DINO_FOOT_LEFT_DOWN;
@@ -251,15 +257,15 @@ void move_dino() {
   switch(dino_state) {
 
     case DINO_FOOT_LEFT_DOWN:
-      set_sprite_tile(0, RIGHT_FOOT_DINO_1_TILE);
-      set_sprite_tile(1, RIGHT_FOOT_DINO_2_TILE);
+      set_sprite_tile(DINO_1, RIGHT_FOOT_DINO_1_TILE);
+      set_sprite_tile(DINO_2, RIGHT_FOOT_DINO_2_TILE);
       dino_state = DINO_FOOT_RIGHT_DOWN;
       delay(FOOT_SWITCH_SPEED);
       break;
 
     case DINO_FOOT_RIGHT_DOWN:
-      set_sprite_tile(0, LEFT_FOOT_DINO_1_TILE);
-      set_sprite_tile(1, LEFT_FOOT_DINO_2_TILE);
+      set_sprite_tile(DINO_1, LEFT_FOOT_DINO_1_TILE);
+      set_sprite_tile(DINO_2, LEFT_FOOT_DINO_2_TILE);
       dino_state = DINO_FOOT_LEFT_DOWN;
       delay(FOOT_SWITCH_SPEED);
       break;
@@ -272,8 +278,8 @@ void move_dino() {
 void dino_jump() {
 
   // Change the sprite to Idle Dino for jump
-  set_sprite_tile(0, IDLE_DINO_1_TILE);
-  set_sprite_tile(1, IDLE_DINO_2_TILE);
+  set_sprite_tile(DINO_1, IDLE_DINO_1_TILE);
+  set_sprite_tile(DINO_2, IDLE_DINO_2_TILE);
 
   // Play the jump sound
   play_jump_noise();
@@ -313,13 +319,13 @@ void dino_duck() {
   while (key_press & J_DOWN) {
     switch(dino_state) {
       case DINO_FOOT_LEFT_DOWN:
-        set_sprite_tile(1, DUCK_DINO_RIGHT);
+        set_sprite_tile(DINO_2, DUCK_DINO_RIGHT);
         dino_state = DINO_FOOT_RIGHT_DOWN;
         delay(FOOT_SWITCH_SPEED);
         break;
 
       case DINO_FOOT_RIGHT_DOWN:
-        set_sprite_tile(1, DUCK_DINO_LEFT);
+        set_sprite_tile(DINO_2, DUCK_DINO_LEFT);
         dino_state = DINO_FOOT_LEFT_DOWN;
         delay(FOOT_SWITCH_SPEED);
         break;
@@ -334,9 +340,9 @@ void dino_duck() {
 
 void move_hazards() {
   if (CACTUS_X == 8) CACTUS_X = GRAPHICS_WIDTH;
-  move_sprite(20, CACTUS_X, DINO_Y);
-  move_sprite(21, CACTUS_X + 8, DINO_Y);
-  CACTUS_X -= 5;
+  move_sprite(CACTUS_1, CACTUS_X, CACTUS_Y);
+  move_sprite(CACTUS_2, CACTUS_X + 8, CACTUS_Y);
+  CACTUS_X -= 8;
 }
 
 void update_score(UBYTE digit_pos) {
@@ -404,36 +410,64 @@ void update_score(UBYTE digit_pos) {
   }
 }
 
-UBYTE check_collisions(UBYTE x_1, UBYTE y_1, UBYTE w_1, UBYTE h_1, UBYTE x_2, UBYTE y_2, UBYTE w_2, UBYTE h_2) {
+BOOLEAN check_collisions(UBYTE x_1, UBYTE y_1, UBYTE w_1, UBYTE h_1, UBYTE x_2, UBYTE y_2, UBYTE w_2, UBYTE h_2) {
+  // Standard rectangle-to-rectangle collision check
   if ((x_1 < (x_2 + w_2)) && ((x_1 + w_1) > x_2) && (y_1 < (h_2 + y_2)) && ((y_1 + h_1) > y_2)) return 1;
   else return 0;
 }
 
+void game_over() {
+  //
+  set_sprite_tile(DINO_1, HURT_DINO_1);
+  set_sprite_tile(DINO_2, HURT_DINO_2);
+
+  wait_vbl_done();
+
+  //
+  move_win(GAME_OVER_X, GAME_OVER_Y);
+  SHOW_WIN;
+  SHOW_BKG;
+
+  //
+  play_death_noise();
+
+  waitpad(J_A);
+  restart();
+}
+
+
 void restart() {
-  // Save current high score
-  // Reset difficulty, etc.
+  HIDE_SPRITES;
+  HIDE_WIN;
+  HIDE_BKG;
+
+  setup_score();
+  dino_state = DINO_FOOT_LEFT_DOWN;
+
+  SHOW_SPRITES;
+  run_game();
+  // Save current high score, reset difficulty, clear sprite tiles, etc.
 }
 
 void run_game() {
 
   // DEBUG
   CACTUS_X = GRAPHICS_WIDTH - 24;
-  CACTUS_Y = DINO_Y;
-  set_sprite_tile(20, CACTUS_1);
-  set_sprite_tile(21, CACTUS_2);
-  move_sprite(20, CACTUS_X, DINO_Y);
-  move_sprite(21, CACTUS_X + 8, DINO_Y);
+  CACTUS_Y = DINO_Y - 2;
+
+  set_sprite_tile(CACTUS_1, CACTUS_1_TILE);
+  set_sprite_tile(CACTUS_2, CACTUS_2_TILE);
+
+  move_sprite(CACTUS_1, CACTUS_X, CACTUS_Y);
+  move_sprite(CACTUS_2, CACTUS_X + 8, CACTUS_Y);
 
   while(1) {
     wait_vbl_done();
 
     // Handle Dino feet sprite swapping
     move_dino();
-    if (check_collisions(DINO_X, DINO_Y, 8, 8, CACTUS_X, CACTUS_Y, 8, 8) == 1) {
-      set_sprite_tile(0, HURT_DINO_1);
-      set_sprite_tile(1, HURT_DINO_2);
-      play_death_noise();
-      waitpad(J_A);
+    if (check_collisions(DINO_X, DINO_Y, 12, 12, CACTUS_X, CACTUS_Y, 8, 8) == 1) {
+      game_over();
     }
 
     // Handle updating score from rightmost digit
@@ -445,27 +479,31 @@ void run_game() {
     }
 
     if (key_press & J_DOWN) {
-      set_sprite_tile(0, DUCK_DINO_TAIL);
-      set_sprite_tile(1, DUCK_DINO_LEFT);
-      set_sprite_tile(2, DUCK_DINO_BODY);
-      set_sprite_tile(3, DUCK_DINO_HEAD);
+      // Set ducking Dino running sprites
+      set_sprite_tile(DINO_1, DUCK_DINO_TAIL);
+      set_sprite_tile(DINO_2, DUCK_DINO_LEFT);
+      set_sprite_tile(DINO_3, DUCK_DINO_BODY);
+      set_sprite_tile(DINO_4, DUCK_DINO_HEAD);
 
-      move_sprite(0, DINO_X - 8, DINO_Y + 3);
-      move_sprite(1, DINO_X + DINO_SPRITE_X_SIZE - 8, DINO_Y + 3);
-      move_sprite(2, DINO_X + 8, DINO_Y + 3);
-      move_sprite(3, DINO_X + 16, DINO_Y + 3);
+      // Move the ducking Dino sprites into place
+      move_sprite(DINO_1, DINO_X - DINO_SPRITE_X_SIZE, DINO_Y + 3);
+      move_sprite(DINO_2, DINO_X, DINO_Y + 3);
+      move_sprite(DINO_3, DINO_X + DINO_SPRITE_X_SIZE, DINO_Y + 3);
+      move_sprite(DINO_4, DINO_X + DINO_SPRITE_X_SIZE + DINO_SPRITE_X_SIZE, DINO_Y + 3);
 
       dino_duck();
 
-      // Return to non-ducking running sprites
-      set_sprite_tile(0, RIGHT_FOOT_DINO_1_TILE);
-      set_sprite_tile(1, RIGHT_FOOT_DINO_2_TILE);
-      move_sprite(0, DINO_X,  DINO_Y);
-      move_sprite(1, DINO_X + DINO_SPRITE_X_SIZE, DINO_Y);
+      // Return to non-ducking Dino running sprites
+      set_sprite_tile(DINO_1, RIGHT_FOOT_DINO_1_TILE);
+      set_sprite_tile(DINO_2, RIGHT_FOOT_DINO_2_TILE);
 
-      // Hide the extra loaded sprites
-      move_sprite(2, GRAPHICS_WIDTH, 0);
-      move_sprite(3, GRAPHICS_WIDTH, 0);
+      // Move the non-ducking Dino sprites into place
+      move_sprite(DINO_1, DINO_X,  DINO_Y);
+      move_sprite(DINO_2, DINO_X + DINO_SPRITE_X_SIZE, DINO_Y);
+
+      // Hide the extra loaded sprites off screen
+      move_sprite(DINO_3, GRAPHICS_WIDTH + DINO_SPRITE_X_SIZE, GRAPHICS_HEIGHT);
+      move_sprite(DINO_4, GRAPHICS_WIDTH + DINO_SPRITE_X_SIZE, GRAPHICS_HEIGHT);
     }
 
     // Scroll objects to the left
@@ -478,6 +516,19 @@ void run_game() {
 }
 
 int main() {
+
+  //
+  HIDE_WIN;
+  HIDE_BKG;
+  HIDE_SPRITES;
+
+  //
+  DISPLAY_ON;
+
+  // disable_interrupts();
+  // add_TIM(update_score);
+  // enable_interrupts();
+
   // Turn on sound
   NR52_REG = 0x80;
 
@@ -496,20 +547,25 @@ int main() {
   // Load all the Dino sprites at once
   set_sprite_data(0, DINO_TILE_COUNT, Dino);
 
-  // Load and place the UI symbols after dino sprites
-  set_sprite_data(DINO_TILE_COUNT, SYMBOLS_TILE_COUNT, Symbols);
+  // Load and place digit sprites after dino sprites
+  set_sprite_data(DINO_TILE_COUNT, DIGITS_TILE_COUNT, Digits);
 
   // Load and place the hazard sprites after the UI symbols
-  set_sprite_data(DINO_TILE_COUNT + SYMBOLS_TILE_COUNT + 1, HAZARDS_TILE_COUNT, Hazards);
+  set_sprite_data(DINO_TILE_COUNT + DIGITS_TILE_COUNT, HAZARDS_TILE_COUNT, Hazards);
 
   // The dino sprite is comprised of 2 smaller sprites that make one 8x16 sprite
   // Load both parts of the Dino sprite into the first two tile slots
-  set_sprite_tile(0, IDLE_DINO_1_TILE);
-  set_sprite_tile(1, IDLE_DINO_2_TILE);
+  set_sprite_tile(DINO_1, IDLE_DINO_1_TILE);
+  set_sprite_tile(DINO_2, IDLE_DINO_2_TILE);
 
   // Place both parts of the Dino sprite in the play area and arrange them side by side
-  move_sprite(0, DINO_X,  DINO_Y);
-  move_sprite(1, DINO_X + DINO_SPRITE_X_SIZE, DINO_Y);
+  move_sprite(DINO_1, DINO_X,  DINO_Y);
+  move_sprite(DINO_2, DINO_X + DINO_SPRITE_X_SIZE, DINO_Y);
+
+  //
+  set_win_data(0, LETTERS_TILE_COUNT, Letters);
+  set_win_tiles(0, 0, GameoverWidth, GameoverHeight, Gameover);
+
 
   // Wait for V_BLANK interrupt (screen drawing refresh)
   wait_vbl_done();
@@ -525,6 +581,5 @@ int main() {
 
   // DEBUG: Demo mode
   run_game();
-
 }
 /* FUNCTIONS END */
