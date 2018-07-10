@@ -1,8 +1,7 @@
 ROM_NAME = dinoboy.gb
 
-TOOLS_DIR = /Users/rauln/code/gb_dev
-
 # Directories
+TOOLS_DIR = ~/code/gb_dev
 GBDK_DIR = $(TOOLS_DIR)/gbdk
 SRC_DIR = ./src
 DIST_DIR = ./bin
@@ -26,9 +25,13 @@ $(OBJ_DIR)/%.o : $(SRC_DIR)/%.c
 	@mkdir -p $(OBJ_DIR)
 	$(CC) -c -o $@ $<
 
+.PHONE : build
+build: 	$(ROM_FILE)
+
 .PHONY : run
 run: $(ROM_FILE)
 	wine $(EMULATOR) $<
+	
 
 .PHONY : clean
 clean:

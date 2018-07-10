@@ -1,3 +1,4 @@
+# macOS Desktop Services file
 .DS_Store
 
 # Prerequisites
@@ -52,3 +53,6 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
+
+# Editor config folder
+*.vscode

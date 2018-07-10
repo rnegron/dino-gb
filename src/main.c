@@ -109,31 +109,44 @@
 
 #define LETTERS_TILE_COUNT   0x2C
 #define DIGITS_TILE_COUNT    0x28
-#define SCORE_DIGITS         0x05 // i.e. 00000
+#define SCORE_DIGITS         0x05 // i.e. 5 digits: 00000
 #define SCORE_X              0x54
 #define SCORE_Y              0x16
 #define GAME_OVER_X          0x28
 #define GAME_OVER_Y          0x28
 
 #define HAZARDS_TILE_COUNT   0x04
+#define DINO_JUMP_SPEED      0x08
+
+#define BLANK_TILE           0x48
 
 /* MACROS END */
 
 
 /* GLOBALS START */
-UBYTE DINO_X, DINO_Y;
-UBYTE dino_state;  // 1 == right foot down, 2 == left foot down
-UBYTE key_press;  // Holds the return value of the joypad() function
-UBYTE i;  // Reusable counter variable
-UBYTE digit_left, digit_right; // Left and right sprite index of a digit
-UBYTE CACTUS_X, CACTUS_Y;
+UBYTE DINO_X, DINO_Y;           // Store Dino Sprite coordinates
+UBYTE dino_state;               // 1 == right foot down, 2 == left foot down
+UBYTE key_press;                // Holds the return value of the joypad() function
+UBYTE i;                        // Reusable counter variable
+UBYTE digit_left, digit_right;  // Left and right sprite index of a digit
+UBYTE CACTUS_X, CACTUS_Y;       // Store nearest Cactus hazard coordinates
+UBYTE high_score;               // Store an integer representation of the high score
+
+// Variables in which to save the score sprite indexes
+UBYTE SCORE_1_1_TILE, SCORE_1_2_TILE, SCORE_2_1_TILE, SCORE_2_2_TILE, 
+      SCORE_3_1_TILE, SCORE_3_2_TILE, SCORE_4_1_TILE, SCORE_4_2_TILE, 
+      SCORE_5_1_TILE, SCORE_5_2_TILE;
 /* GLOBALS END */
 
 /* PROTOTYPES START */
 void setup_score();
+// UBYTE score_sprite_to_num();
+// void set_high_score();
 void start_jump();
-void play_jump_noise();
-void play_death_noise();
+void play_jump_sound();
+void play_death_sound();
+void play_score_sound();
+void flash_score();
 void move_dino();
 void dino_jump();
 void dino_duck();
@@ -142,13 +155,16 @@ void update_score(UBYTE);
 BOOLEAN check_collisions(UBYTE, UBYTE, UBYTE, UBYTE, UBYTE, UBYTE, UBYTE, UBYTE);
 void game_over();
 void restart();
+BOOLEAN new_high_score();
 void run_game();
 /* PROTOTYPES END */
 
 /* FUNCTIONS START */
 void setup_score() {
+  /* Using sprites to keep a visual score. Changing sprites simulates increasing the score. */
 
-  // Draw starting score
+  // Load the both parts of the ZERO sprite (which is 8x16 pixels)
+  // into all five corresponding digit positions
   set_sprite_tile(SCORE_1_1, ZERO_1);
   set_sprite_tile(SCORE_1_2, ZERO_2);
   set_sprite_tile(SCORE_2_1, ZERO_1);
@@ -160,7 +176,8 @@ void setup_score() {
   set_sprite_tile(SCORE_5_1, ZERO_1);
   set_sprite_tile(SCORE_5_2, ZERO_2);
 
-
+  // Move the digits into (X, Y) position on the screen,
+  // each 8 pixels further right on the X-axis
   move_sprite(SCORE_1_1, SCORE_X, SCORE_Y);
   move_sprite(SCORE_1_2, SCORE_X + 8, SCORE_Y);
   move_sprite(SCORE_2_1, SCORE_X + 16, SCORE_Y);
@@ -173,11 +190,18 @@ void setup_score() {
   move_sprite(SCORE_5_2, SCORE_X + 72, SCORE_Y);
 }
 
+// UBYTE score_sprite_to_num() {
+
+// }
+
+// void set_high_score(){
+
+// }
+
 void start_jump() {
   // Runs after the player presses the A buton after the game boots
   dino_jump();
 
-  // Start background
   wait_vbl_done();
 
   // Start score display
@@ -187,46 +211,21 @@ void start_jump() {
   dino_state = DINO_FOOT_LEFT_DOWN;
 }
 
-void play_jump_noise() {
+void play_jump_sound() {
   NR10_REG = 0x79;
   NR11_REG = 0x8A;
   NR12_REG = 0xA1;
   NR13_REG = 0xE0;
   NR14_REG = 0xC6;
-  NR21_REG = 0x91;
-  NR22_REG = 0x84;
-  NR23_REG = 0xD7;
-  NR24_REG = 0x86;
-  NR30_REG = 0x80;
-  NR31_REG = 0x00;
-  NR32_REG = 0x20;
-  NR33_REG = 0xD6;
-  NR34_REG = 0x86;
-  NR41_REG = 0x3A;
-  NR42_REG = 0xA1;
-  NR43_REG = 0x00;
-  NR44_REG = 0xC0;
 }
 
-void play_death_noise() {
+void play_death_sound() {
   NR10_REG = 0x70;
   NR11_REG = 0x8A;
   NR12_REG = 0x44;
   NR13_REG = 0xF4;
   NR14_REG = 0x81;
-  NR21_REG = 0x81;
-  NR22_REG = 0x84;
-  NR23_REG = 0xD7;
-  NR24_REG = 0x86;
-  NR30_REG = 0x80;
-  NR31_REG = 0x00;
-  NR32_REG = 0x20;
-  NR33_REG = 0xD6;
-  NR34_REG = 0x86;
-  NR41_REG = 0x3A;
-  NR42_REG = 0xA1;
-  NR43_REG = 0x00;
-  NR44_REG = 0xC0;
+  
 
   delay(100);
 
@@ -235,19 +234,71 @@ void play_death_noise() {
   NR12_REG = 0x44;
   NR13_REG = 0xC8;
   NR14_REG = 0x80;
-  NR21_REG = 0x81;
-  NR22_REG = 0x84;
-  NR23_REG = 0xD7;
-  NR24_REG = 0x86;
-  NR30_REG = 0x80;
-  NR31_REG = 0x00;
-  NR32_REG = 0x20;
-  NR33_REG = 0xD6;
-  NR34_REG = 0x86;
-  NR41_REG = 0x3A;
-  NR42_REG = 0xA1;
-  NR43_REG = 0x00;
-  NR44_REG = 0xC0;
+}
+
+void play_score_sound() {
+  NR10_REG = 0x00;
+  NR11_REG = 0x80;
+  NR12_REG = 0x63;
+  NR13_REG = 0x03;
+  NR14_REG = 0x87;
+
+  delay(100);
+
+  NR10_REG = 0x00;
+  NR11_REG = 0x80;
+  NR12_REG = 0x63;
+  NR13_REG = 0x53;
+  NR14_REG = 0x87;
+}
+
+void flash_score() {
+  // Save the current score sprites
+  SCORE_1_1_TILE = get_sprite_tile(SCORE_1_1);
+  SCORE_1_2_TILE = get_sprite_tile(SCORE_1_2);
+  SCORE_2_1_TILE = get_sprite_tile(SCORE_2_1);
+  SCORE_2_2_TILE = get_sprite_tile(SCORE_2_2);
+  SCORE_3_1_TILE = get_sprite_tile(SCORE_3_1);
+  SCORE_3_2_TILE = get_sprite_tile(SCORE_3_2);
+  SCORE_4_1_TILE = get_sprite_tile(SCORE_4_1);
+  SCORE_4_2_TILE = get_sprite_tile(SCORE_4_2);
+  SCORE_5_1_TILE = get_sprite_tile(SCORE_5_1);
+  SCORE_5_2_TILE = get_sprite_tile(SCORE_5_2);
+
+  for (i = 0; i < 3; i++) {
+    set_sprite_tile(SCORE_1_1, BLANK_TILE);
+    set_sprite_tile(SCORE_1_2, BLANK_TILE);
+    set_sprite_tile(SCORE_2_1, BLANK_TILE);
+    set_sprite_tile(SCORE_2_2, BLANK_TILE);
+    set_sprite_tile(SCORE_3_1, BLANK_TILE);
+    set_sprite_tile(SCORE_3_2, BLANK_TILE);
+    set_sprite_tile(SCORE_4_1, BLANK_TILE);
+    set_sprite_tile(SCORE_4_2, BLANK_TILE);
+    set_sprite_tile(SCORE_5_1, BLANK_TILE);
+    set_sprite_tile(SCORE_5_2, BLANK_TILE);
+
+    delay(500);
+
+    set_sprite_tile(SCORE_1_1, SCORE_1_1_TILE);
+    set_sprite_tile(SCORE_1_2, SCORE_1_2_TILE);
+    set_sprite_tile(SCORE_2_1, SCORE_2_1_TILE);
+    set_sprite_tile(SCORE_2_2, SCORE_2_2_TILE);
+    set_sprite_tile(SCORE_3_1, SCORE_3_1_TILE);
+    set_sprite_tile(SCORE_3_2, SCORE_3_2_TILE);
+    set_sprite_tile(SCORE_4_1, SCORE_4_1_TILE);
+    set_sprite_tile(SCORE_4_2, SCORE_4_2_TILE);
+    set_sprite_tile(SCORE_5_1, SCORE_5_1_TILE);
+    set_sprite_tile(SCORE_5_2, SCORE_5_2_TILE);
+
+    delay(500);
+  }
+
+  // Simulates time passing and score increasing 
+  // while the score flashes
+  set_sprite_tile(SCORE_4_1, TWO_1);
+  set_sprite_tile(SCORE_4_2, TWO_2);
+  set_sprite_tile(SCORE_5_1, FIVE_1);
+  set_sprite_tile(SCORE_5_2, FIVE_2);
 }
 
 void move_dino() {
@@ -255,7 +306,6 @@ void move_dino() {
   // Switches the sprites on the Dino to make
   // a running animation, alternating feet
   switch(dino_state) {
-
     case DINO_FOOT_LEFT_DOWN:
       set_sprite_tile(DINO_1, RIGHT_FOOT_DINO_1_TILE);
       set_sprite_tile(DINO_2, RIGHT_FOOT_DINO_2_TILE);
@@ -269,9 +319,6 @@ void move_dino() {
       dino_state = DINO_FOOT_LEFT_DOWN;
       delay(FOOT_SWITCH_SPEED);
       break;
-
-    default:
-      break;
   }
 }
 
@@ -282,7 +329,7 @@ void dino_jump() {
   set_sprite_tile(DINO_2, IDLE_DINO_2_TILE);
 
   // Play the jump sound
-  play_jump_noise();
+  play_jump_sound();
 
   // Moving up...
   for (i = DINO_Y; i != DINO_Y - 40; --i) {
@@ -290,7 +337,7 @@ void dino_jump() {
     move_sprite(1, DINO_X + DINO_SPRITE_X_SIZE, i);
 
     key_press = joypad();
-    delay(8);
+    delay(DINO_JUMP_SPEED);
 
     // Check if currently holding the DOWN button for fast descent
     if (key_press & J_DOWN) {
@@ -298,6 +345,7 @@ void dino_jump() {
     }
 
     // Check if currently holding the jump key after a certain height
+    // This is to allow variation in jump height, but still force a minimum jump height
     if (i <= (DINO_Y - 25)) {
       if (key_press & J_A) continue;
       else break;
@@ -311,7 +359,7 @@ void dino_jump() {
   for (i; i != DINO_Y; ++i) {
     move_sprite(0, DINO_X, i);
     move_sprite(1, DINO_X + DINO_SPRITE_X_SIZE, i);
-    delay(8);
+    delay(DINO_JUMP_SPEED);
   }
 }
 
@@ -346,7 +394,7 @@ void move_hazards() {
 }
 
 void update_score(UBYTE digit_pos) {
-  // This is a recursive function (!)
+  // Note: This is a recursive function
 
   // Store the current digit sprite index, which is comprised of
   // two 8x16 sprites, a left and a right half.
@@ -404,49 +452,90 @@ void update_score(UBYTE digit_pos) {
       set_sprite_tile(digit_left, ZERO_1);
       set_sprite_tile(digit_right, ZERO_2);
 
-      if (digit_pos != 1) update_score(--digit_pos);
+      // If this position is a carry position, move on to the next digit
+      if (digit_pos != 1) {
+
+        // Perform a recursion on the next digit (to the left)
+        update_score(--digit_pos);
+
+        // If this digit is a multiple of 100, play a sound and flash the screen
+        if (digit_pos == 3) {
+          play_score_sound();
+          flash_score();
+        }
+      }
+
       // else BUG: Catch overflow here?
       break; // DEBUG Does this break statement "break" tail recursion...?
   }
 }
 
-BOOLEAN check_collisions(UBYTE x_1, UBYTE y_1, UBYTE w_1, UBYTE h_1, UBYTE x_2, UBYTE y_2, UBYTE w_2, UBYTE h_2) {
+BOOLEAN check_collisions(UBYTE x_1, UBYTE y_1, UBYTE w_1, UBYTE h_1,
+                         UBYTE x_2, UBYTE y_2, UBYTE w_2, UBYTE h_2) {
+
   // Standard rectangle-to-rectangle collision check
-  if ((x_1 < (x_2 + w_2)) && ((x_1 + w_1) > x_2) && (y_1 < (h_2 + y_2)) && ((y_1 + h_1) > y_2)) return 1;
+  if ((x_1 < (x_2 + w_2)) && ((x_1 + w_1) > x_2) &&
+      (y_1 < (h_2 + y_2)) && ((y_1 + h_1) > y_2)) return 1;
   else return 0;
 }
 
 void game_over() {
-  //
+  // Store the score at game over
+  SCORE_1_1_TILE = get_sprite_tile(SCORE_1_1);
+  SCORE_1_2_TILE = get_sprite_tile(SCORE_1_2);
+  SCORE_2_1_TILE = get_sprite_tile(SCORE_2_1);
+  SCORE_2_2_TILE = get_sprite_tile(SCORE_2_2);
+  SCORE_3_1_TILE = get_sprite_tile(SCORE_3_1);
+  SCORE_3_2_TILE = get_sprite_tile(SCORE_3_2);
+  SCORE_4_1_TILE = get_sprite_tile(SCORE_4_1);
+  SCORE_4_2_TILE = get_sprite_tile(SCORE_4_2);
+  SCORE_5_1_TILE = get_sprite_tile(SCORE_5_1);
+  SCORE_5_2_TILE = get_sprite_tile(SCORE_5_2);
+
+  // Switch to the hurt dino sprites
   set_sprite_tile(DINO_1, HURT_DINO_1);
   set_sprite_tile(DINO_2, HURT_DINO_2);
 
+  play_death_sound();
+
   wait_vbl_done();
 
-  //
+  // Check to see if there is a new high score
+  if (new_high_score)
+
+  // Move the game over window to position and display it
   move_win(GAME_OVER_X, GAME_OVER_Y);
   SHOW_WIN;
   SHOW_BKG;
 
-  //
-  play_death_noise();
-
+  // Wait for user to acknowledge game over
   waitpad(J_A);
+
+  // Start the game again!
   restart();
 }
 
 
 void restart() {
+  /* 
+    TODO: Save current high score, reset difficulty, clear sprite tiles, etc.
+  */
+
+  // Hide all graphical objects while we reset them
   HIDE_SPRITES;
   HIDE_WIN;
   HIDE_BKG;
 
+  // Flush the score sprites
   setup_score();
+
+  // Reset the dino's starting position
   dino_state = DINO_FOOT_LEFT_DOWN;
 
   SHOW_SPRITES;
+
+  // Start the game loop
   run_game();
-  // Save current high score, reset difficulty, clear sprite tiles, etc.
 }
 
 void run_game() {
@@ -466,6 +555,8 @@ void run_game() {
 
     // Handle Dino feet sprite swapping
     move_dino();
+
+    // Handle Dino collision with 
     if (check_collisions(DINO_X, DINO_Y, 12, 12, CACTUS_X, CACTUS_Y, 8, 8) == 1) {
       game_over();
     }
@@ -507,7 +598,7 @@ void run_game() {
     }
 
     // Scroll objects to the left
-    move_hazards();
+    // move_hazards();
 
     //Scroll the background
     // move_world();
@@ -515,19 +606,23 @@ void run_game() {
   }
 }
 
+BOOLEAN new_high_score() {
+
+}
+
 int main() {
 
-  //
+  // Hide graphical objects while the game is being set up
   HIDE_WIN;
   HIDE_BKG;
   HIDE_SPRITES;
 
-  //
+  // Performs a bitwise inclusive OR on LCDC_REG(0xFF40) with 0x80U
+  // (Turns on bit 7 of the 8-bit LCD Control Register)
   DISPLAY_ON;
 
-  // disable_interrupts();
-  // add_TIM(update_score);
-  // enable_interrupts();
+  // Disable interrupts as they are not being used
+  disable_interrupts();
 
   // Turn on sound
   NR52_REG = 0x80;
@@ -541,7 +636,7 @@ int main() {
   // Use two 8x8 sprites stacked on top of one another
   SPRITES_8x16;
 
-  DINO_X = 0x14;
+  DINO_X = 0x14;                 // Set DINO_X position as 20
   DINO_Y = GRAPHICS_HEIGHT - 17; // Y position is relative to the bottom of the screen
 
   // Load all the Dino sprites at once
@@ -562,7 +657,7 @@ int main() {
   move_sprite(DINO_1, DINO_X,  DINO_Y);
   move_sprite(DINO_2, DINO_X + DINO_SPRITE_X_SIZE, DINO_Y);
 
-  //
+  // Load the tiles used to write GAME OVER on a window
   set_win_data(0, LETTERS_TILE_COUNT, Letters);
   set_win_tiles(0, 0, GameoverWidth, GameoverHeight, Gameover);
 
