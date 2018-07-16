@@ -19,7 +19,6 @@ lcc src/main.c -o dinoboy.gb
 
 Then open the resulting `dinoboy.gb` file with your favorite emulator!
 
-#### Example GIF of v0.1.0:
+#### Example GIF of v0.2.0:
 
-
-![sample gif](assets/sample.gif)
+<iframe src='https://gfycat.com/ifr/UnfitFoolhardyAtlanticsharpnosepuffer' frameborder='0' scrolling='no' width='808' height='724' allowfullscreen></iframe>

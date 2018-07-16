@@ -4,6 +4,9 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 ## [To-Do]
+  - Randomization
+    - Hazard spawns
+    - background elements (have to change most to sprites)
   - Clock based timing, instead of delay()
   - Pterodactyl sprites
   - Collisions
@@ -12,14 +15,27 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
   - Difficulty increase
     - Night shift after certain score
     - Scroll speed increases as the score gets higher 
-  - Score Window
-    - Hi Score tracking
-  - Parallax Scrolling background
   - Extras
     - Battery Saving
       - Toggle sounds (write 0x00 to NR52_REG for sound OFF, 0x80 for sound ON)
       - Perform HALT when screen is paused (interrupt to remove HALT)
+    - Easter eggs
+      - Dino blinks if you idle at the start
 
+
+## [0.2.0] - 2018-07-15
+### Added
+  - Rudimentary background scrolling.
+  - Rudimentary Hi score tracking.
+  - Added plenty of bugs related to clock speed...
+
+### Changed
+  - Refactored in preparation for the upcoming removal of `delay()` calls.
+  - Now running `clang-format` on `main.c` before commit.
+  - Disabled `flash_score()` and such until `delay()` calls can be removed.
+
+### Removed
+  - `move_dino()`, `dino_duck` and `dino_jump()` functions.
 
 ## [0.1.1] - 2018-07-10
 ### Added
