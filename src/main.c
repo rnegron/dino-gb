@@ -24,141 +24,141 @@
 
 /* MACROS START */
 // Dino VRAM tile indices
-#define IDLE_DINO_1_TILE 0x00
-#define IDLE_DINO_2_TILE 0x02
-#define HURT_DINO_1_TILE 0x04
-#define HURT_DINO_2_TILE 0x06
-#define RIGHT_FOOT_DINO_1_TILE 0x08
-#define RIGHT_FOOT_DINO_2_TILE 0x0A
-#define LEFT_FOOT_DINO_1_TILE 0x0C
-#define LEFT_FOOT_DINO_2_TILE 0X0E
-#define DUCK_DINO_1_TILE 0x10
-#define DUCK_DINO_2_TILE 0x12
-#define DUCK_DINO_3_TILE 0x14
+#define IDLE_DINO_1_TILE 0x00U
+#define IDLE_DINO_2_TILE 0x02U
+#define HURT_DINO_1_TILE 0x04U
+#define HURT_DINO_2_TILE 0x06U
+#define RIGHT_FOOT_DINO_1_TILE 0x08U
+#define RIGHT_FOOT_DINO_2_TILE 0x0AU
+#define LEFT_FOOT_DINO_1_TILE 0x0CU
+#define LEFT_FOOT_DINO_2_TILE 0X0EU
+#define DUCK_DINO_1_TILE 0x10U
+#define DUCK_DINO_2_TILE 0x12U
+#define DUCK_DINO_3_TILE 0x14U
 
 // Dino Tile Indices
-#define IDLE_DINO_1 0x00
-#define IDLE_DINO_2 0x01
-#define HURT_DINO_1 0x04
-#define HURT_DINO_2 0x06
-#define RIGHT_STEP_DINO_1 0x08
-#define RIGHT_STEP_DINO_2 0x0A
-#define LEFT_STEP_DINO_1 0x0C
-#define LEFT_STEP_DINO_2 0x0E
-#define DUCK_DINO_BODY 0x10
-#define DUCK_DINO_HEAD 0x12
-#define DUCK_DINO_TAIL 0x14
-#define DUCK_DINO_LEFT 0x16
-#define DUCK_DINO_RIGHT 0x1A
+#define IDLE_DINO_1 0x00U
+#define IDLE_DINO_2 0x01U
+#define HURT_DINO_1 0x04U
+#define HURT_DINO_2 0x06U
+#define RIGHT_STEP_DINO_1 0x08U
+#define RIGHT_STEP_DINO_2 0x0AU
+#define LEFT_STEP_DINO_1 0x0CU
+#define LEFT_STEP_DINO_2 0x0EU
+#define DUCK_DINO_BODY 0x10U
+#define DUCK_DINO_HEAD 0x12U
+#define DUCK_DINO_TAIL 0x14U
+#define DUCK_DINO_LEFT 0x16U
+#define DUCK_DINO_RIGHT 0x1AU
 
 // Dino Sprite Indices
-#define DINO_1 0x00
-#define DINO_2 0x01
-#define DINO_3 0x03
-#define DINO_4 0x04
+#define DINO_1 0x00U
+#define DINO_2 0x01U
+#define DINO_3 0x03U
+#define DINO_4 0x04U
 
 // Digit Tiles
-#define ZERO_1 0x1C
-#define ZERO_2 0x1E
-#define ONE_1 0x20
-#define ONE_2 0x22
-#define TWO_1 0x24
-#define TWO_2 0x26
-#define THREE_1 0x28
-#define THREE_2 0x2A
-#define FOUR_1 0x2C
-#define FOUR_2 0x2E
-#define FIVE_1 0x30
-#define FIVE_2 0x32
-#define SIX_1 0x34
-#define SIX_2 0x36
-#define SEVEN_1 0x38
-#define SEVEN_2 0x3A
-#define EIGHT_1 0x3C
-#define EIGHT_2 0x3E
-#define NINE_1 0x40
-#define NINE_2 0x42
+#define ZERO_1 0x1CU
+#define ZERO_2 0x1EU
+#define ONE_1 0x20U
+#define ONE_2 0x22U
+#define TWO_1 0x24U
+#define TWO_2 0x26U
+#define THREE_1 0x28U
+#define THREE_2 0x2AU
+#define FOUR_1 0x2CU
+#define FOUR_2 0x2EU
+#define FIVE_1 0x30U
+#define FIVE_2 0x32U
+#define SIX_1 0x34U
+#define SIX_2 0x36U
+#define SEVEN_1 0x38U
+#define SEVEN_2 0x3AU
+#define EIGHT_1 0x3CU
+#define EIGHT_2 0x3EU
+#define NINE_1 0x40U
+#define NINE_2 0x42U
 
 // Digit Sprite Indices
-#define SCORE_1_1 0x0A
-#define SCORE_1_2 0x0B
-#define SCORE_2_1 0x0C
-#define SCORE_2_2 0x0D
-#define SCORE_3_1 0x0E
-#define SCORE_3_2 0x0F
-#define SCORE_4_1 0x10
-#define SCORE_4_2 0x11
-#define SCORE_5_1 0x12
-#define SCORE_5_2 0x13
+#define SCORE_1_1 0x0AU
+#define SCORE_1_2 0x0BU
+#define SCORE_2_1 0x0CU
+#define SCORE_2_2 0x0DU
+#define SCORE_3_1 0x0EU
+#define SCORE_3_2 0x0FU
+#define SCORE_4_1 0x10U
+#define SCORE_4_2 0x11U
+#define SCORE_5_1 0x12U
+#define SCORE_5_2 0x13U
 
-#define HI_SCORE_1_1 0x14
-#define HI_SCORE_1_2 0x15
-#define HI_SCORE_2_1 0x16
-#define HI_SCORE_2_2 0x17
-#define HI_SCORE_3_1 0x18
-#define HI_SCORE_3_2 0x19
-#define HI_SCORE_4_1 0x1A
-#define HI_SCORE_4_2 0x1B
-#define HI_SCORE_5_1 0x1C
-#define HI_SCORE_5_2 0x1D
+#define HI_SCORE_1_1 0x14U
+#define HI_SCORE_1_2 0x15U
+#define HI_SCORE_2_1 0x16U
+#define HI_SCORE_2_2 0x17U
+#define HI_SCORE_3_1 0x18U
+#define HI_SCORE_3_2 0x19U
+#define HI_SCORE_4_1 0x1AU
+#define HI_SCORE_4_2 0x1BU
+#define HI_SCORE_5_1 0x1CU
+#define HI_SCORE_5_2 0x1DU
 
 
-#define H_1 0x05
-#define H_2 0x06
-#define I_1 0x07
-#define I_2 0x08
-#define H_1_TILE 0x68
-#define H_2_TILE 0x6A
-#define I_1_TILE 0x6C
-#define I_2_TILE 0x6E
+#define H_1 0x05U
+#define H_2 0x06U
+#define I_1 0x07U
+#define I_2 0x08U
+#define H_1_TILE 0x68U
+#define H_2_TILE 0x6AU
+#define I_1_TILE 0x6CU
+#define I_2_TILE 0x6EU
 
-#define HI_SCORE_X 0x54
-#define HI_SCORE_Y 0x28
+#define HI_SCORE_X 0x54U
+#define HI_SCORE_Y 0x28U
 
 // Hazards
-#define CACTUS_TILE 0x4F
+#define CACTUS_TILE 0x4FU
 
 // Hazard Sprite Tiles
-#define CACTUS_1_TILE 0x44
-#define CACTUS_2_TILE 0x46
+#define CACTUS_1_TILE 0x44U
+#define CACTUS_2_TILE 0x46U
 
 // Hazard Sprite Indices
-#define CACTUS_1 0x1E
-#define CACTUS_2 0x1F
+#define CACTUS_1 0x1EU
+#define CACTUS_2 0x1FU
 
 // Extra macros
-#define DINO_SPRITE_X_SIZE 0x08
-#define FOOT_SWITCH_SPEED 0x64 // 100 in base 10 (Microseconds)
-#define DINO_FOOT_RIGHT_DOWN 0x01
-#define DINO_FOOT_LEFT_DOWN 0x02
-#define DINO_JUMPING 0x03
-#define DINO_FALLING 0x04
+#define DINO_SPRITE_X_SIZE 0x08U
+#define FOOT_SWITCH_SPEED 0x64U // 100 in base 10 (Microseconds)
+#define DINO_FOOT_RIGHT_DOWN 0x01U
+#define DINO_FOOT_LEFT_DOWN 0x02U
+#define DINO_JUMPING 0x03U
+#define DINO_FALLING 0x04U
 
-#define DINO_TILE_COUNT 0x1C
-#define HAZARDS_TILE_COUNT 0x04
-#define LETTERS_TILE_COUNT 0x2C
-#define DIGITS_TILE_COUNT 0x28
-#define BACKGROUND_TILE_COUNT 0x20
+#define DINO_TILE_COUNT 0x1CU
+#define HAZARDS_TILE_COUNT 0x04U
+#define LETTERS_TILE_COUNT 0x2CU
+#define DIGITS_TILE_COUNT 0x28U
+#define BACKGROUND_TILE_COUNT 0x20U
 
-#define DEFAULT_DINO_X 0x14
+#define DEFAULT_DINO_X 0x14U
 #define DEFAULT_DINO_Y GRAPHICS_HEIGHT - 17
-#define SCORE_X 0x54
-#define SCORE_Y 0x16
-#define GAME_OVER_X 0x28
-#define GAME_OVER_Y 0x32
+#define SCORE_X 0x54U
+#define SCORE_Y 0x16U
+#define GAME_OVER_X 0x28U
+#define GAME_OVER_Y 0x32U
 
 // Used for the intro, where only a small patch of ground is visible
-#define GROUND_PATCH_1 0x07
-#define GROUND_PATCH_2 0x08
-#define GROUND_PATCH_3 0x09
-#define GROUND_PATCH_1_TILE 0x4B
-#define GROUND_PATCH_2_TILE 0x4D
-#define GROUND_PATCH_3_TILE 0x51
-#define GROUND_PATCH_X 0x13
+#define GROUND_PATCH_1 0x07U
+#define GROUND_PATCH_2 0x08U
+#define GROUND_PATCH_3 0x09U
+#define GROUND_PATCH_1_TILE 0x4BU
+#define GROUND_PATCH_2_TILE 0x4DU
+#define GROUND_PATCH_3_TILE 0x51U
+#define GROUND_PATCH_X 0x13U
 #define GROUNG_PATCH_Y GRAPHICS_HEIGHT - 16
 
-#define SCORE_DIGITS 0x05 // i.e. 5 digits: 00000
-#define BLANK_TILE 0x48   // Useful "blank" or invisible tile
+#define SCORE_DIGITS 0x05U // i.e. 5 digits: 00000
+#define BLANK_TILE 0x48U   // Useful "blank" or invisible tile
 /* MACROS END */
 
 /* GLOBALS START */
@@ -166,16 +166,18 @@ UBYTE dino_x, dino_y;          // Store Dino Sprite coordinates
 UBYTE bkg_x;                   // Background X coordinate for scrolling
 UBYTE dino_state;              // 1 == right foot down, 2 == left foot down, 3 == jumping, 4 == falling
 UBYTE key_press;               // Holds the return value of the joypad() function
-UBYTE i;                       // Reusable counter variable
+UBYTE i;                       // 8 bit reusable counter variable
 UBYTE digit_left, digit_right; // Left and right sprite index of a digit
 UBYTE tmp_digit;               // Temporary digit used for holding a digit index while calculating score
 UBYTE CACTUS_X, CACTUS_Y;      // Store nearest Cactus hazard coordinates
-UBYTE current_score;           // Store an integer representation of the current score
-UBYTE high_score;              // Store an integer representation of the high score
-BOOLEAN high_score_toggle;
 
-UWORD jump_start_time; //
-UWORD time_delta;      //
+BOOLEAN high_score_toggle;     // Toggle for whether or not to show the high score sprites
+
+ULWORD j;                // 32 bit reusable variable
+ULWORD current_score;    // Store a 32 bit integer representation of the current score
+ULWORD high_score;       // Store 32 bit integer representation of the high score
+UWORD jump_start_time;   //
+UWORD time_delta;        //
 
 // Variables in which to save the score sprite indexes
 UBYTE SCORE_1_1_TILE, SCORE_1_2_TILE, SCORE_2_1_TILE, SCORE_2_2_TILE,
@@ -186,8 +188,8 @@ UBYTE SCORE_1_1_TILE, SCORE_1_2_TILE, SCORE_2_1_TILE, SCORE_2_2_TILE,
 /* PROTOTYPES START */
 void setup_score_sprites();
 void setup_hi_score_sprites();
-UBYTE get_multiplier(UBYTE);
-UBYTE score_sprite_to_num(UBYTE);
+UWORD get_multiplier(UBYTE);
+ULWORD score_sprite_to_num(UBYTE);
 UBYTE num_to_left_score_sprite(UBYTE);
 UBYTE num_to_right_score_sprite(UBYTE);
 void set_high_score();
@@ -197,7 +199,7 @@ void play_death_sound();
 void play_score_sound();
 // void flash_score();
 void move_hazards();
-void move_bkg();
+void move_background();
 void update_score(UBYTE);
 BOOLEAN check_collisions(UBYTE, UBYTE, UBYTE, UBYTE, UBYTE, UBYTE, UBYTE, UBYTE);
 void game_over();
@@ -244,16 +246,16 @@ void setup_hi_score_sprites()
 
   // Load the both parts of the ZERO sprite (two parts because it is 8x16 pixels in total)
   // into all five corresponding digit positions
-  set_sprite_tile(HI_SCORE_1_1, num_to_left_score_sprite((high_score / 10000) % 10));
-  set_sprite_tile(HI_SCORE_1_2, num_to_right_score_sprite((high_score / 10000) % 10));
-  set_sprite_tile(HI_SCORE_2_1, num_to_left_score_sprite((high_score / 1000) % 10));
-  set_sprite_tile(HI_SCORE_2_2, num_to_right_score_sprite((high_score / 1000) % 10));
-  set_sprite_tile(HI_SCORE_3_1, num_to_left_score_sprite((high_score / 100) % 10));
-  set_sprite_tile(HI_SCORE_3_2, num_to_right_score_sprite((high_score / 100) % 10));
-  set_sprite_tile(HI_SCORE_4_1, num_to_left_score_sprite((high_score / 10) % 10));
-  set_sprite_tile(HI_SCORE_4_2, num_to_right_score_sprite((high_score / 10) % 10));
-  set_sprite_tile(HI_SCORE_5_1, num_to_left_score_sprite(high_score % 10));
-  set_sprite_tile(HI_SCORE_5_2, num_to_right_score_sprite(high_score % 10));
+  set_sprite_tile(HI_SCORE_1_1, num_to_left_score_sprite((high_score / 10000U) % 10));
+  set_sprite_tile(HI_SCORE_1_2, num_to_right_score_sprite((high_score / 10000U) % 10));
+  set_sprite_tile(HI_SCORE_2_1, num_to_left_score_sprite((high_score / 1000U) % 10));
+  set_sprite_tile(HI_SCORE_2_2, num_to_right_score_sprite((high_score / 1000U) % 10));
+  set_sprite_tile(HI_SCORE_3_1, num_to_left_score_sprite((high_score / 100U) % 10));
+  set_sprite_tile(HI_SCORE_3_2, num_to_right_score_sprite((high_score / 100U) % 10));
+  set_sprite_tile(HI_SCORE_4_1, num_to_left_score_sprite((high_score / 10U) % 10));
+  set_sprite_tile(HI_SCORE_4_2, num_to_right_score_sprite((high_score / 10U) % 10));
+  set_sprite_tile(HI_SCORE_5_1, num_to_left_score_sprite(high_score % 10U));
+  set_sprite_tile(HI_SCORE_5_2, num_to_right_score_sprite(high_score % 10U));
 
   // The high score sprites use the second, lighter palette
   set_sprite_prop(HI_SCORE_1_1, S_PALETTE);
@@ -281,15 +283,15 @@ void setup_hi_score_sprites()
   move_sprite(HI_SCORE_5_2, HI_SCORE_X + 72, HI_SCORE_Y);
 }
 
-UBYTE get_multiplier(UBYTE digit_pos)
+UWORD get_multiplier(UBYTE digit_pos)
 {
   switch (digit_pos)
   {
   case 5:
-    return 1;
+    return 1; 
 
   case 4:
-    return 10;
+    return 10; 
 
   case 3:
     return 100;
@@ -302,16 +304,16 @@ UBYTE get_multiplier(UBYTE digit_pos)
   }
 }
 
-UBYTE score_sprite_to_num(UBYTE digit_pos)
+ULWORD score_sprite_to_num(UBYTE digit_pos)
 {
 
-  // This tail-recursive function returns a UBYTE representation of the current score
-  // Reusing i as an accumulator here, which was reset before the call to this function
+  // This tail-recursive function returns a ULWORD (32 bit) representation of the current score
+  // Reusing j as an accumulator here, which was reset before the call to this function
 
   if (digit_pos == 0)
-    return i;
+    return j;
 
-  // For an explanation of the formula used here, check out the update_score() function
+  // For an explanation of the formula used here, check out the update_score() function docstring
   digit_right = SCORE_1_2 + ((digit_pos - 1) << 1);
 
   tmp_digit = get_sprite_tile(digit_right);
@@ -321,55 +323,55 @@ UBYTE score_sprite_to_num(UBYTE digit_pos)
 
   else if (tmp_digit == ONE_2)
   {
-    i += (get_multiplier(digit_pos) * 1);
+    j += (get_multiplier(digit_pos) * 1U);
     return score_sprite_to_num(--digit_pos);
   }
 
   else if (tmp_digit == TWO_2)
   {
-    i += (get_multiplier(digit_pos) * 2);
+    j += (get_multiplier(digit_pos) * 2U);
     return score_sprite_to_num(--digit_pos);
   }
 
   else if (tmp_digit == THREE_2)
   {
-    i += (get_multiplier(digit_pos) * 3);
+    j += (get_multiplier(digit_pos) * 3U);
     return score_sprite_to_num(--digit_pos);
   }
 
   else if (tmp_digit == FOUR_2)
   {
-    i += (get_multiplier(digit_pos) * 4);
+    j += (get_multiplier(digit_pos) * 4U);
     return score_sprite_to_num(--digit_pos);
   }
 
   else if (tmp_digit == FIVE_2)
   {
-    i += (get_multiplier(digit_pos) * 5);
+    j += (get_multiplier(digit_pos) * 5U);
     return score_sprite_to_num(--digit_pos);
   }
 
   else if (tmp_digit == SIX_2)
   {
-    i += (get_multiplier(digit_pos) * 6);
+    j += (get_multiplier(digit_pos) * 6U);
     return score_sprite_to_num(--digit_pos);
   }
 
   else if (tmp_digit == SEVEN_2)
   {
-    i += (get_multiplier(digit_pos) * 7);
+    j += (get_multiplier(digit_pos) * 7U);
     return score_sprite_to_num(--digit_pos);
   }
 
   else if (tmp_digit == EIGHT_2)
   {
-    i += (get_multiplier(digit_pos) * 8);
+    j += (get_multiplier(digit_pos) * 8U);
     return score_sprite_to_num(--digit_pos);
   }
 
   else if (tmp_digit == NINE_2)
   {
-    i += (get_multiplier(digit_pos) * 9);
+    j += (get_multiplier(digit_pos) * 9U);
     return score_sprite_to_num(--digit_pos);
   }
 }
@@ -437,7 +439,7 @@ void set_high_score()
   high_score = current_score;
 
   if (!high_score_toggle)
-    high_score_toggle = 1;
+    high_score_toggle = TRUE;
 }
 
 void start_jump()
@@ -574,7 +576,7 @@ void move_hazards()
   CACTUS_X -= 8;
 }
 
-void move_bkg()
+void move_background()
 {
   if (bkg_x == GRAPHICS_WIDTH)
     bkg_x = 0;
@@ -785,6 +787,9 @@ void run_game()
     // Wait for V_BLANK interrupt (screen drawing refresh)
     wait_vbl_done();
 
+    // DEBUG
+    if (joypad() & J_LEFT) game_over();
+
     // Perform particular logic based on the state of the Dino
     switch (dino_state)
     {
@@ -935,18 +940,18 @@ void run_game()
     // }
 
     // Scroll hazards to the left
-    move_hazards();
+    // move_hazards();
 
     // Scroll the background
-    move_bkg();
+    move_background();
   }
 }
 
 BOOLEAN new_high_score()
 {
-  i = 0;
+  j = 0U;
   current_score = score_sprite_to_num(5);
-  return current_score > high_score ? 1 : 0;
+  return current_score > high_score ? TRUE : FALSE;
 }
 
 int main()
@@ -992,11 +997,12 @@ int main()
   set_sprite_tile(DINO_1, IDLE_DINO_1_TILE);
   set_sprite_tile(DINO_2, IDLE_DINO_2_TILE);
 
-  //
+  // Set a small patch of ground as visible to simulate the background before being drawn in
   set_sprite_tile(GROUND_PATCH_1, GROUND_PATCH_1_TILE);
   set_sprite_tile(GROUND_PATCH_2, GROUND_PATCH_2_TILE);
   set_sprite_tile(GROUND_PATCH_3, GROUND_PATCH_3_TILE);
 
+  // Move the ground sprites into position below the Dino
   move_sprite(GROUND_PATCH_1, GROUND_PATCH_X, GROUNG_PATCH_Y);
   move_sprite(GROUND_PATCH_2, GROUND_PATCH_X + 8, GROUNG_PATCH_Y);
   move_sprite(GROUND_PATCH_3, GROUND_PATCH_X + 16, GROUNG_PATCH_Y);
@@ -1009,16 +1015,16 @@ int main()
   set_win_data(0, LETTERS_TILE_COUNT, Letters);
   set_win_tiles(0, 0, GameoverWidth, GameoverHeight, Gameover);
 
-  //
+  // Set the position of the background X coordinate, load the data and set the tiles
   bkg_x = 0;
   set_bkg_data(LETTERS_TILE_COUNT, 32, BackgroundTiles);
   set_bkg_tiles(bkg_x, 0, BackgroundMapWidth, BackgroundMapHeight, BackgroundMap);
 
   // Hide the high score display at the start
-  high_score_toggle = 0;
+  high_score_toggle = FALSE;
 
-  // No high score so far!
-  high_score = 0;
+  // No score so far!
+  high_score = current_score = 0U;
 
   // Performs a bitwise inclusive OR on LCDC_REG(0xFF40) with 0x80U
   // (Turns on bit 7 of the 8-bit LCD Control Register)

@@ -23,6 +23,18 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
       - Dino blinks if you idle at the start
 
 
+## [0.2.1] - 2018-07-22
+### Added
+  - Added trailing `U` to designate most numeric constants as unsigned and therefore avoid compiler promotion.
+
+### Changed
+  - Migrated the project over to GitHub from GitLab.
+  - Renamed `move_bkg()` to `move_background()` to avoid shadowing GBDK's `move_bkg()`.
+
+### Fixed
+  - Now uses a 32 bit variable to keep track of the score. Function prototypes and return values adjusted accordingly. Previously, it would keep a score up to 255 (used an unsigned 8 bit variable).
+
+
 ## [0.2.0] - 2018-07-15
 ### Added
   - Rudimentary background scrolling.
@@ -44,6 +56,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
   - Added Visual Studio Code folder with tasks to `.gitignore`
   - Build step to Makefile
   - Put comments in all the blank comment lines
+
 ### Changed
   - CHANGELOG.md had the years set as 2017, should be 2018.
   - Changed the last part of the sound function names (from `_noise` to _`sound`).
