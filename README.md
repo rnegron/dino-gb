@@ -20,3 +20,11 @@ lcc src/main.c -o dinoboy.gb
 ```
 
 Then open the resulting `dinoboy.gb` file with your favorite emulator!
+
+<br/>
+<br/>
+<br/>
+
+<center>
+    <img src="demo.gif" height=160 width=144>
+</center>
