@@ -25,7 +25,7 @@ $(OBJ_DIR)/%.o : $(SRC_DIR)/%.c
 	@mkdir -p $(OBJ_DIR)
 	$(CC) -c -o $@ $<
 
-.PHONE : build
+.PHONY : build
 build: 	$(ROM_FILE)
 
 .PHONY : run

@@ -4,14 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 ## [To-Do]
+  - Tune the game to feel more like the original (jumping, meter speed, etc.)
+  - Fix background scroll speed bug
   - Randomization
-    - Hazard spawns
     - background elements (have to change most to sprites)
-  - Clock based timing, instead of delay()
   - Pterodactyl sprites
   - Collisions
     - Collisions with Pterodactyl
-    - Collision from above
   - Difficulty increase
     - Night shift after certain score
     - Scroll speed increases as the score gets higher 
@@ -22,6 +21,23 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
     - Easter eggs
       - Dino blinks if you idle at the start
 
+## [0.5.0] - 2018-10-07
+### Added
+  - `rand.h` header for using `rand()` (spawning hazards randomly).
+  - Gravity, velocity, speed, timer, counters and clock related variables.
+  - Explicit build step to the Makefile.
+  - Preliminary hazard spawning randomly at different speeds.
+  
+### Changed
+  - Changed license from BSD to the Chromium license.
+  - Removed `delay()` calls and started the transition towards physics based jumping using `time()`.
+  - Move game loop into `update()` and `render()` calls.
+  - Now formatting code based on Artistic Style 3.1 with default braces.
+  - Reordered some of the functions.
+  - Fix some comment typos.
+  - Dino state can now be __right foot down__, __left foot down__ or __jumping__.
+  - Change background scrolling to be on a timer based variable.
+  - Change feet swapping animation to be on the timer as well.
 
 ## [0.2.1] - 2018-07-22
 ### Added
