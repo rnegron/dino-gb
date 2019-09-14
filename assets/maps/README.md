@@ -1,0 +1,1 @@
+For use with [Harry Mulder's Gameboy Map Builder](http://www.devrs.com/gb/hmgd/gbmb.html).

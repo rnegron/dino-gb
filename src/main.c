@@ -15,13 +15,13 @@
 #include <gb/gb.h>      // Main GBDK import header
 #include <gb/drawing.h> // GRAPHICS_HEIGHT, GRAPHICS_WIDTH
 
-#include "dino.c"               // Dino sprites
-#include "letters.c"            // Letter sprites 
-#include "digits.c"             // Digit sprites
-#include "hazards.c"            // Cactus sprites
-#include "gameover.c"           // "H", "I", etc. sprites
-#include "background_tiles.c"   // Clouds, ground sprites
-#include "background_map.c"     // Background map file
+#include "graphics/dino.c"               // Dino sprites
+#include "graphics/letters.c"            // Letter sprites 
+#include "graphics/digits.c"             // Digit sprites
+#include "graphics/hazards.c"            // Cactus sprites
+#include "graphics/gameover.c"           // "H", "I", etc. sprites
+#include "graphics/background_tiles.c"   // Clouds, ground sprites
+#include "graphics/background_map.c"     // Background map file
 
 /* --- MACROS START --- */
 // Dino VRAM tile indices

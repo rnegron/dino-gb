@@ -4,7 +4,7 @@
 
 __Note: The source code for the original Chromium version is available at__: https://cs.chromium.org/chromium/src/components/neterror/resources/offline.js
 
-If you'd like, run the following commands in `Bash` for maximum fun!
+If you'd like, run the following commands in `bash` for maximum fun!
 
 ```shell
 echo "alias dino="make"" >> ~/.bashrc
@@ -20,6 +20,3 @@ lcc src/main.c -o dinoboy.gb
 ```
 
 Then open the resulting `dinoboy.gb` file with your favorite emulator!
-
-Here's a slowed-down gif of the game!
-![dino-demo](https://thumbs.gfycat.com/AmbitiousHappygoluckyBonobo-size_restricted.gif)
