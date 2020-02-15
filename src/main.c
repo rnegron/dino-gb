@@ -170,7 +170,7 @@ UBYTE button_press;            // Hold the last return value of the joypad() fun
 UBYTE prev_button_press;       // Hold the next-to-last return value of the joypad() function
 UBYTE i;                       // 8 bit reusable counter variable
 UBYTE digit_left, digit_right; // Left and right sprite index of a digit in the meter (score)
-UBYTE tmp_digit;               // Temporary digit used for holding a digit index while calculating score
+UBYTE tmp_digit;               // Temp digit used for holding a digit index while calculating score
 UBYTE cactus_x, cactus_y;      // Store nearest Cactus hazard coordinates
 UBYTE cactus_speed;            // Speed of incoming cactus, controlled by difficulty
 UBYTE velocity;                // y-axis velocity vector for jumping
@@ -733,7 +733,7 @@ void start_jump()
 
 void game_over()
 {
-    // Store the score at game over
+    // Store the current score at game over
     SCORE_1_1_TILE = get_sprite_tile(SCORE_1_1);
     SCORE_1_2_TILE = get_sprite_tile(SCORE_1_2);
     SCORE_2_1_TILE = get_sprite_tile(SCORE_2_1);
@@ -759,19 +759,6 @@ void game_over()
 
     // Check to see if there is a new high score
     if (new_high_score()) {
-        // If this is the first high score, move the high score sprites into position
-        // if (!high_score_toggle) {
-        // set_sprite_data(DINO_TILE_COUNT + DIGITS_TILE_COUNT + HAZARDS_TILE_COUNT, LETTERS_TILE_COUNT, Letters);
-        // set_sprite_tile(H_1, H_1_TILE);
-        // set_sprite_tile(H_2, H_2_TILE);
-        // set_sprite_tile(I_1, I_1_TILE);
-        // set_sprite_tile(I_2, I_2_TILE);
-
-        // move_sprite(H_1, HI_SCORE_X, HI_SCORE_Y + 0x18);
-        // move_sprite(H_2, HI_SCORE_X + 0x08, HI_SCORE_Y + 0x18);
-        // move_sprite(I_1, HI_SCORE_X + 0x10, HI_SCORE_Y + 0x18);
-        // move_sprite(I_2, HI_SCORE_X + 0x18, HI_SCORE_Y + 0x18);
-        // }
         set_high_score();
         setup_hi_score_sprites();
     }
