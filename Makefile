@@ -9,7 +9,7 @@ OBJ_DIR = ./build
 
 # Binaries
 CC	= $(GBDK_DIR)/bin/lcc
-EMULATOR = $(TOOLS_DIR)/bgb/bgb.exe
+EMULATOR = /Applications/bgbw64/bgb64.exe
 
 # Files
 ROM_FILE = $(DIST_DIR)/$(ROM_NAME)
@@ -31,7 +31,7 @@ build: 	$(ROM_FILE)
 .PHONY : run
 run: $(ROM_FILE)
 	wine $(EMULATOR) $<
-	
+
 
 .PHONY : clean
 clean:

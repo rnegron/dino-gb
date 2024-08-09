@@ -9,6 +9,7 @@
 *.ko
 *.obj
 *.elf
+*.ihx
 
 # Linker output
 *.ilk
@@ -45,6 +46,9 @@
 *.su
 *.idb
 *.pdb
+*.sym
+*.asm
+*.lst
 
 # Kernel Module Compile Results
 *.mod*

@@ -12,16 +12,18 @@
 
 #include <time.h>       // time_t, clock_t, time(), clock()
 #include <rand.h>       // rand(), initrand()
+#include <stdint.h>     // uint8_t, uint16_t, uint32_t
+#include <stdbool.h>    // bool, true, false
 #include <gb/gb.h>      // Main GBDK import header
 #include <gb/drawing.h> // GRAPHICS_HEIGHT, GRAPHICS_WIDTH
 
-#include "graphics/dino.c"               // Dino sprites
-#include "graphics/letters.c"            // Letter sprites 
-#include "graphics/digits.c"             // Digit sprites
-#include "graphics/hazards.c"            // Cactus sprites
-#include "graphics/gameover.c"           // "H", "I", etc. sprites
-#include "graphics/background_tiles.c"   // Clouds, ground sprites
-#include "graphics/background_map.c"     // Background map file
+#include "graphics/dino.c"             // Dino sprites
+#include "graphics/letters.c"          // Letter sprites
+#include "graphics/digits.c"           // Digit sprites
+#include "graphics/hazards.c"          // Cactus sprites
+#include "graphics/gameover.c"         // "H", "I", etc. sprites
+#include "graphics/background_tiles.c" // Clouds, ground sprites
+#include "graphics/background_map.c"   // Background map file
 
 /* --- MACROS START --- */
 // Dino VRAM tile indices
@@ -159,73 +161,73 @@
 #define DINO_FOOT_RIGHT_DOWN 0x00U
 #define DINO_FOOT_LEFT_DOWN 0x01U
 #define DINO_JUMPING 0x02U
-#define BLANK_TILE 0x48U   // Useful "blank" or invisible tile
+#define BLANK_TILE 0x48U // Useful "blank" or invisible tile
 /* --- MACROS END --- */
 
+/* --- FUNCTION PROTOTYPES START --- */
+void setup_score_sprites(void);
+void setup_hi_score_sprites(void);
+void update_score(uint8_t digit_pos);
+void set_high_score(void);
+bool new_high_score(void);
+uint16_t get_multiplier(uint8_t digit_pos);
+uint32_t score_sprite_to_num(uint8_t digit_pos);
+uint8_t num_to_left_score_sprite(uint8_t digit);
+uint8_t num_to_right_score_sprite(uint8_t digit);
+void play_jump_sound(void);
+void play_death_sound(void);
+void play_score_sound(void);
+void spawn_hazard(void);
+void move_hazards(void);
+void move_background(void);
+bool check_collisions(uint8_t x_1, uint8_t y_1, uint8_t w_1, uint8_t h_1,
+                      uint8_t x_2, uint8_t y_2, uint8_t w_2, uint8_t h_2);
+void start_jump(void);
+void game_over(void);
+void restart(void);
+void run_game(void);
+void update(void);
+void render(void);
+int8_t main(void);
+/* --- FUNCTION PROTOTYPES END --- */
+
 /* --- GLOBALS START --- */
-UBYTE dino_x, dino_y;          // Store Dino Sprite coordinates
-UBYTE bkg_x;                   // Background X coordinate for scrolling
-UBYTE dino_state;              // 0 == right foot down, 1 == left foot down, 2 == jumping
-UBYTE button_press;            // Hold the last return value of the joypad() function
-UBYTE prev_button_press;       // Hold the next-to-last return value of the joypad() function
-UBYTE i;                       // 8 bit reusable counter variable
-UBYTE digit_left, digit_right; // Left and right sprite index of a digit in the meter (score)
-UBYTE tmp_digit;               // Temp digit used for holding a digit index while calculating score
-UBYTE cactus_x, cactus_y;      // Store nearest Cactus hazard coordinates
-UBYTE cactus_speed;            // Speed of incoming cactus, controlled by difficulty
-UBYTE velocity;                // y-axis velocity vector for jumping
-UBYTE speed_drop_coefficient;  // A coefficient for dropping faster from a jump
-UBYTE timer;                   // Ticks ever iteration of the main game loop
-UBYTE hazards_on_screen;       // Counts the amount of current hazards on screen
+uint8_t dino_x, dino_y;          // Store Dino Sprite coordinates
+uint8_t bkg_x;                   // Background X coordinate for scrolling
+uint8_t dino_state;              // 0 == right foot down, 1 == left foot down, 2 == jumping
+uint8_t button_press;            // Hold the last return value of the joypad() function
+uint8_t prev_button_press;       // Hold the next-to-last return value of the joypad() function
+uint8_t i;                       // 8 bit reusable counter variable
+uint8_t digit_left, digit_right; // Left and right sprite index of a digit in the meter (score)
+uint8_t tmp_digit;               // Temp digit used for holding a digit index while calculating score
+uint8_t cactus_x, cactus_y;      // Store nearest Cactus hazard coordinates
+uint8_t cactus_speed;            // Speed of incoming cactus, controlled by difficulty
+uint8_t velocity;                // y-axis velocity vector for jumping
+uint8_t speed_drop_coefficient;  // A coefficient for dropping faster from a jump
+uint8_t timer;                   // Ticks ever iteration of the main game loop
+uint8_t hazards_on_screen;       // Counts the amount of current hazards on screen
 
+bool high_score_toggle;   // Toggle for whether or not to show the high score sprites
+bool playing_score_sound; // Indicates if the score jingle is playing, as it takes priority
 
-BOOLEAN high_score_toggle;     // Toggle for whether or not to show the high score sprites
-BOOLEAN playing_score_sound;   // Indicates if the score jingle is playing, as it takes priority
+uint32_t j;             // 32 bit reusable variable
+uint32_t current_score; // Store a 32 bit integer representation of the current score
+uint32_t high_score;    // Store 32 bit integer representation of the high score
 
-ULWORD j;               // 32 bit reusable variable
-ULWORD current_score;   // Store a 32 bit integer representation of the current score
-ULWORD high_score;      // Store 32 bit integer representation of the high score
-
-time_t time_game_started;                // Seconds since the CPU has started running
-clock_t clock_jump_start, clock_delta;   // For keeping track of jumps and updating the position
+time_t time_game_started;              // Seconds since the CPU has started running
+clock_t clock_jump_start, clock_delta; // For keeping track of jumps and updating the position
 
 // Variables in which to save the score sprite indexes
-UBYTE SCORE_1_1_TILE, SCORE_1_2_TILE,
-      SCORE_2_1_TILE, SCORE_2_2_TILE,
-      SCORE_3_1_TILE, SCORE_3_2_TILE,
-      SCORE_4_1_TILE, SCORE_4_2_TILE,
-      SCORE_5_1_TILE, SCORE_5_2_TILE;
+uint8_t SCORE_1_1_TILE, SCORE_1_2_TILE,
+    SCORE_2_1_TILE, SCORE_2_2_TILE,
+    SCORE_3_1_TILE, SCORE_3_2_TILE,
+    SCORE_4_1_TILE, SCORE_4_2_TILE,
+    SCORE_5_1_TILE, SCORE_5_2_TILE;
 
 /* --- GLOBALS END --- */
 
-/* --- PROTOTYPES START --- */
-void setup_score_sprites();
-void setup_hi_score_sprites();
-void update_score(UBYTE);
-void set_high_score();
-BOOLEAN new_high_score();
-UWORD get_multiplier(UBYTE);
-ULWORD score_sprite_to_num(UBYTE);
-UBYTE num_to_left_score_sprite(UBYTE);
-UBYTE num_to_right_score_sprite(UBYTE);
-void play_jump_sound();
-void play_death_sound();
-void play_score_sound();
-// void flash_score();
-void spawn_hazard();
-void move_hazards();
-void move_background();
-BOOLEAN check_collisions(UBYTE, UBYTE, UBYTE, UBYTE, UBYTE, UBYTE, UBYTE, UBYTE);
-void start_jump();
-void game_over();
-void restart();
-void run_game();
-void update();
-void render();
-/* --- PROTOTYPES END --- */
-
 /* --- FUNCTIONS START --- */
-void setup_score_sprites()
+void setup_score_sprites(void)
 {
     /* Using sprites to keep a visual score. Changing sprites simulates increasing the score. */
 
@@ -256,7 +258,7 @@ void setup_score_sprites()
     move_sprite(SCORE_5_2, SCORE_X + 0x48U, SCORE_Y);
 }
 
-void setup_hi_score_sprites()
+void setup_hi_score_sprites(void)
 {
     /* Using sprites to keep a visual score. Changing sprites simulates increasing the score. */
 
@@ -299,7 +301,7 @@ void setup_hi_score_sprites()
     move_sprite(HI_SCORE_5_2, HI_SCORE_X + 0x48U, HI_SCORE_Y);
 }
 
-void update_score(UBYTE digit_pos)
+void update_score(uint8_t digit_pos)
 {
     // Note: This is a recursive function
 
@@ -318,7 +320,8 @@ void update_score(UBYTE digit_pos)
         = 0x0A + 0x06 = 0x10 = SCORE_4_1
     */
 
-    switch (get_sprite_tile(digit_right)) {
+    switch (get_sprite_tile(digit_right))
+    {
     case ZERO_2:
         set_sprite_tile(digit_left, ONE_1);
         set_sprite_tile(digit_right, ONE_2);
@@ -360,13 +363,15 @@ void update_score(UBYTE digit_pos)
         set_sprite_tile(digit_right, ZERO_2);
 
         // If this position is a carry position, move on to the next digit
-        if (digit_pos != 0x01U) {
+        if (digit_pos != 0x01U)
+        {
 
             // Perform a recursion on the next digit (to the left)
             update_score(--digit_pos);
 
             // If this digit is a multiple of 100, play a sound and flash the screen
-            if (digit_pos == 0x03U) {
+            if (digit_pos == 0x03U)
+            {
                 play_score_sound();
                 // flash_score();
             }
@@ -377,27 +382,28 @@ void update_score(UBYTE digit_pos)
     }
 }
 
-void set_high_score()
+void set_high_score(void)
 {
-    /* Checks if the current score is indeed the highest. Sets a BOOLEAN */
+    /* Checks if the current score is indeed the highest. Sets a bool */
 
     high_score = current_score;
 
     if (!high_score_toggle)
-        high_score_toggle = TRUE;
+        high_score_toggle = true;
 }
 
-BOOLEAN new_high_score()
+bool new_high_score(void)
 {
     /*  */
     j = 0x00U;
     current_score = score_sprite_to_num(0x05U);
-    return current_score > high_score ? TRUE : FALSE;
+    return current_score > high_score ? true : false;
 }
 
-UWORD get_multiplier(UBYTE digit_pos)
+uint16_t get_multiplier(uint8_t digit_pos)
 {
-    switch (digit_pos) {
+    switch (digit_pos)
+    {
     case 0x05U:
         return 1;
 
@@ -412,13 +418,16 @@ UWORD get_multiplier(UBYTE digit_pos)
 
     case 0x01U:
         return 10000;
+    default:
+        // Default return (should be unreachable)
+        return 0;
     }
 }
 
-ULWORD score_sprite_to_num(UBYTE digit_pos)
+uint32_t score_sprite_to_num(uint8_t digit_pos)
 {
 
-    // This tail-recursive function returns a ULWORD (32 bit) representation of the current score
+    // This tail-recursive function returns a uint32_t (32 bit) representation of the current score
     // Reusing j as an accumulator here, which was reset before the call to this function
 
     if (digit_pos == 0x00U)
@@ -432,57 +441,67 @@ ULWORD score_sprite_to_num(UBYTE digit_pos)
     if (tmp_digit == ZERO_2)
         return score_sprite_to_num(--digit_pos);
 
-    else if (tmp_digit == ONE_2) {
+    else if (tmp_digit == ONE_2)
+    {
         j += (get_multiplier(digit_pos) * 0x01U);
         return score_sprite_to_num(--digit_pos);
     }
 
-    else if (tmp_digit == TWO_2) {
+    else if (tmp_digit == TWO_2)
+    {
         j += (get_multiplier(digit_pos) * 0x02U);
         return score_sprite_to_num(--digit_pos);
     }
 
-    else if (tmp_digit == THREE_2) {
+    else if (tmp_digit == THREE_2)
+    {
         j += (get_multiplier(digit_pos) * 0x03U);
         return score_sprite_to_num(--digit_pos);
     }
 
-    else if (tmp_digit == FOUR_2) {
+    else if (tmp_digit == FOUR_2)
+    {
         j += (get_multiplier(digit_pos) * 0x04U);
         return score_sprite_to_num(--digit_pos);
     }
 
-    else if (tmp_digit == FIVE_2) {
+    else if (tmp_digit == FIVE_2)
+    {
         j += (get_multiplier(digit_pos) * 0x05U);
         return score_sprite_to_num(--digit_pos);
     }
 
-    else if (tmp_digit == SIX_2) {
+    else if (tmp_digit == SIX_2)
+    {
         j += (get_multiplier(digit_pos) * 0x06U);
         return score_sprite_to_num(--digit_pos);
     }
 
-    else if (tmp_digit == SEVEN_2) {
+    else if (tmp_digit == SEVEN_2)
+    {
         j += (get_multiplier(digit_pos) * 0x07U);
         return score_sprite_to_num(--digit_pos);
     }
 
-    else if (tmp_digit == EIGHT_2) {
+    else if (tmp_digit == EIGHT_2)
+    {
         j += (get_multiplier(digit_pos) * 0x08U);
         return score_sprite_to_num(--digit_pos);
     }
 
-    else if (tmp_digit == NINE_2) {
+    else if (tmp_digit == NINE_2)
+    {
         j += (get_multiplier(digit_pos) * 0x09U);
         return score_sprite_to_num(--digit_pos);
     }
 }
 
-UBYTE num_to_left_score_sprite(UBYTE digit)
+uint8_t num_to_left_score_sprite(uint8_t digit)
 {
     // This is the left-side-sprite inverse function to score_sprite_to_num()
 
-    switch (digit) {
+    switch (digit)
+    {
     case 0x00U:
         return ZERO_1;
     case 0x01U:
@@ -503,14 +522,18 @@ UBYTE num_to_left_score_sprite(UBYTE digit)
         return EIGHT_1;
     case 0x09:
         return NINE_1;
+    default:
+        // Default return (should be unreachable)
+        return 0x00U;
     }
 }
 
-UBYTE num_to_right_score_sprite(UBYTE digit)
+uint8_t num_to_right_score_sprite(uint8_t digit)
 {
     // This is the right-side sprite-inverse function to score_sprite_to_num()
 
-    switch (digit) {
+    switch (digit)
+    {
     case 0x00:
         return ZERO_2;
     case 0x01U:
@@ -531,10 +554,13 @@ UBYTE num_to_right_score_sprite(UBYTE digit)
         return EIGHT_2;
     case 0x09U:
         return NINE_2;
+    default:
+        // Default return (should be unreachable)
+        return 0x00U;
     }
 }
 
-void play_jump_sound()
+void play_jump_sound(void)
 {
     NR10_REG = 0x79;
     NR11_REG = 0x8A;
@@ -544,7 +570,7 @@ void play_jump_sound()
     NR14_REG = 0xC6;
 }
 
-void play_death_sound()
+void play_death_sound(void)
 {
     NR10_REG = 0x70;
     NR11_REG = 0x8A;
@@ -561,9 +587,9 @@ void play_death_sound()
     NR14_REG = 0x80;
 }
 
-void play_score_sound()
+void play_score_sound(void)
 {
-    playing_score_sound = TRUE;
+    playing_score_sound = true;
 
     NR10_REG = 0x00;
     NR11_REG = 0x80;
@@ -579,7 +605,7 @@ void play_score_sound()
     NR13_REG = 0x53;
     NR14_REG = 0x87;
 
-    playing_score_sound = FALSE;
+    playing_score_sound = false;
 }
 
 // void flash_score()
@@ -633,7 +659,7 @@ void play_score_sound()
 //   set_sprite_tile(SCORE_5_2, FIVE_2);
 // }
 
-void spawn_hazard()
+void spawn_hazard(void)
 {
     /* */
     set_sprite_tile(CACTUS_1, CACTUS_1_TILE);
@@ -642,14 +668,16 @@ void spawn_hazard()
     cactus_x = GRAPHICS_WIDTH - 0x08U;
     cactus_y = DEFAULT_DINO_Y;
 
-    cactus_speed = ((UBYTE)rand() + 0x80U) % 0x03U + 0x02U;
+    cactus_speed = ((uint8_t)rand() + 0x80U) % 0x03U + 0x02U;
     hazards_on_screen++;
 }
 
-void move_hazards()
+void move_hazards(void)
 {
-    if (hazards_on_screen == 0x01U) {
-        if (cactus_x == 0x00U) {
+    if (hazards_on_screen == 0x01U)
+    {
+        if (cactus_x == 0x00U)
+        {
             hazards_on_screen--;
         }
 
@@ -658,7 +686,8 @@ void move_hazards()
         cactus_x -= cactus_speed;
     }
 
-    if (hazards_on_screen == 0x00U) {
+    if (hazards_on_screen == 0x00U)
+    {
         move_sprite(CACTUS_1, 0x00U, 0x00U);
         move_sprite(CACTUS_2, 0x00U, 0x00U);
     }
@@ -667,40 +696,41 @@ void move_hazards()
     // else {
 
     // }
-
 }
 
-void move_background()
+void move_background(void)
 {
     //
     if (bkg_x > GRAPHICS_WIDTH)
         bkg_x = 0x00U;
 
     // Simulate the scrolling of the background by moving its x-axis focus on a timer
-    if (timer % 0x0AU == 0) {
+    if (timer % 0x0AU == 0)
+    {
         ++bkg_x;
         scroll_bkg(bkg_x, 0x00U);
     }
 }
 
-BOOLEAN check_collisions(UBYTE x_1, UBYTE y_1, UBYTE w_1, UBYTE h_1,
-                         UBYTE x_2, UBYTE y_2, UBYTE w_2, UBYTE h_2)
+bool check_collisions(uint8_t x_1, uint8_t y_1, uint8_t w_1, uint8_t h_1,
+                      uint8_t x_2, uint8_t y_2, uint8_t w_2, uint8_t h_2)
 {
 
     // Standard rectangle-to-rectangle collision check
     if ((x_1 < (x_2 + w_2)) && ((x_1 + w_1) > x_2) &&
-            (y_1 < (h_2 + y_2)) && ((y_1 + h_1) > y_2))
+        (y_1 < (h_2 + y_2)) && ((y_1 + h_1) > y_2))
         return 0x01U;
     else
         return 0x00U;
 }
 
-void start_jump()
+void start_jump(void)
 {
     // Runs after the player presses the A buton after the game boots
 
     // Move up...
-    for (i = DEFAULT_DINO_Y; i != DEFAULT_DINO_Y - 0x28U; --i) {
+    for (i = DEFAULT_DINO_Y; i != DEFAULT_DINO_Y - 0x28U; --i)
+    {
         move_sprite(DINO_1, dino_x, i);
         move_sprite(DINO_2, dino_x + DINO_SPRITE_X_SIZE, i);
         delay(5);
@@ -710,7 +740,8 @@ void start_jump()
     delay(60);
 
     // Move down...
-    for (i; i != DEFAULT_DINO_Y; ++i) {
+    for (i; i != DEFAULT_DINO_Y; ++i)
+    {
         move_sprite(DINO_1, dino_x, i);
         move_sprite(DINO_2, dino_x + DINO_SPRITE_X_SIZE, i);
         delay(5);
@@ -731,7 +762,7 @@ void start_jump()
     dino_state = DINO_FOOT_LEFT_DOWN;
 }
 
-void game_over()
+void game_over(void)
 {
     // Store the current score at game over
     SCORE_1_1_TILE = get_sprite_tile(SCORE_1_1);
@@ -758,7 +789,8 @@ void game_over()
     play_death_sound();
 
     // Check to see if there is a new high score
-    if (new_high_score()) {
+    if (new_high_score())
+    {
         set_high_score();
         setup_hi_score_sprites();
     }
@@ -774,7 +806,7 @@ void game_over()
     restart();
 }
 
-void restart()
+void restart(void)
 {
     // Hide all graphical objects while we reset them
     HIDE_SPRITES;
@@ -799,9 +831,10 @@ void restart()
     move_sprite(DINO_1, dino_x, dino_y);
     move_sprite(DINO_2, dino_x + DINO_SPRITE_X_SIZE, dino_y);
 
-    if (hazards_on_screen != 0x00U) {
+    if (hazards_on_screen != 0x00U)
+    {
         cactus_x = 0x00U;
-        cactus_y =  0x00U;
+        cactus_y = 0x00U;
         move_sprite(CACTUS_1, cactus_x, cactus_y);
         move_sprite(CACTUS_2, cactus_x + 8, cactus_y);
         hazards_on_screen = 0x00U;
@@ -818,12 +851,13 @@ void restart()
     run_game();
 }
 
-void run_game()
+void run_game(void)
 {
     // Initialize a helpful timer for managing timing logic
     timer = 0x00U;
 
-    while (TRUE) {
+    while (true)
+    {
 
         // Increment timer each time through the loop;
         ++timer;
@@ -838,7 +872,8 @@ void run_game()
         button_press = joypad();
 
         // We want to jump if the A button is pressed and only if the Dino was not already jumping
-        if (button_press & J_A && dino_state != DINO_JUMPING) {
+        if (button_press & J_A && dino_state != DINO_JUMPING)
+        {
 
             // Check if this is the first jump
             if (clock_jump_start == 0xFFFFU)
@@ -864,14 +899,14 @@ void run_game()
         update();
 
         // Wait for V_BLANK interrupt
-        wait_vbl_done();
+        vsync();
 
         // Run game render logic
         render();
     }
 }
 
-void update()
+void update(void)
 {
     /* Perform particular logic based on the state of the Dino */
 
@@ -883,12 +918,14 @@ void update()
         game_over();
 
     // Handle Dino jumping or falling
-    if (dino_state == DINO_JUMPING) {
+    if (dino_state == DINO_JUMPING)
+    {
         velocity -= (GRAVITY * (clock_delta / CLOCK_PER_DECISEC) * speed_drop_coefficient);
         dino_y -= velocity;
 
         // Hit the "floor"
-        if (dino_y > DEFAULT_DINO_Y) {
+        if (dino_y > DEFAULT_DINO_Y)
+        {
             dino_y = DEFAULT_DINO_Y;
             dino_state = DINO_FOOT_LEFT_DOWN;
             velocity = 0x00U;
@@ -896,20 +933,23 @@ void update()
         }
 
         // Hit max jump height
-        if (dino_y < DEFAULT_DINO_Y - 40U) {
+        if (dino_y < DEFAULT_DINO_Y - 40U)
+        {
             dino_y = DEFAULT_DINO_Y - 40U;
             velocity = -0x02U;
         }
     }
 
     // Handle Dino collision with hazards (only one for now)
-    if (check_collisions(dino_x, dino_y, 0x0CU, 0x0CU, cactus_x, cactus_y, 0x08U, 0x08U) == 0x01U) {
+    if (check_collisions(dino_x, dino_y, 0x0CU, 0x0CU, cactus_x, cactus_y, 0x08U, 0x08U) == 0x01U)
+    {
         game_over();
     }
 
     // There is a chance to spawn a hazard on every 10 ticks of the timer
     // It will trigger if there are less than two hazards on screen and if random number is even
-    if (timer % 0x14U == 0x00U && hazards_on_screen != 0x02U && (rand() % 0x02U)) {
+    if (timer % 0x14U == 0x00U && hazards_on_screen != 0x02U && (rand() % 0x02U))
+    {
 
         // DEBUG, ONLY WANT 1 HAZARD FOR NOW
         if (hazards_on_screen == 0x00U && (time(NULL) - time_game_started >= 0x02U))
@@ -917,7 +957,7 @@ void update()
     }
 }
 
-void render()
+void render(void)
 {
     // Move the Dino if its X or Y position have changed
     move_sprite(DINO_1, dino_x, dino_y);
@@ -925,13 +965,15 @@ void render()
 
     // Simulate the running animation by switching feet on a timer
     if (timer % 0x06U == 0x00U)
-        if (dino_state == DINO_FOOT_LEFT_DOWN) {
+        if (dino_state == DINO_FOOT_LEFT_DOWN)
+        {
             set_sprite_tile(DINO_1, RIGHT_FOOT_DINO_1_TILE);
             set_sprite_tile(DINO_2, RIGHT_FOOT_DINO_2_TILE);
             dino_state = DINO_FOOT_RIGHT_DOWN;
         }
 
-        else if (dino_state == DINO_FOOT_RIGHT_DOWN) {
+        else if (dino_state == DINO_FOOT_RIGHT_DOWN)
+        {
             set_sprite_tile(DINO_1, LEFT_FOOT_DINO_1_TILE);
             set_sprite_tile(DINO_2, LEFT_FOOT_DINO_2_TILE);
             dino_state = DINO_FOOT_LEFT_DOWN;
@@ -949,13 +991,8 @@ void render()
     move_background();
 }
 
-
-int main()
+int8_t main(void)
 {
-
-    // Disable interrupts as they are not being used
-    disable_interrupts();
-
     // Hide graphical objects while the game is being set up
     HIDE_WIN;
     HIDE_BKG;
@@ -1017,7 +1054,7 @@ int main()
     move_sprite(DINO_2, dino_x + DINO_SPRITE_X_SIZE, dino_y);
 
     // Hide the high score display at the start
-    high_score_toggle = FALSE;
+    high_score_toggle = false;
 
     // For use when holding the DOWN button to drop faster from a jump
     speed_drop_coefficient = 0x01U;
@@ -1057,5 +1094,7 @@ int main()
 
     // Go into the main game loop!
     run_game();
+
+    return 0;
 }
 /* --- FUNCTIONS END ---*/
